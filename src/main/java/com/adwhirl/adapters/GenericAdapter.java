@@ -16,35 +16,34 @@
 
 package com.adwhirl.adapters;
 
+import android.util.Log;
 import com.adwhirl.AdWhirlLayout;
 import com.adwhirl.obj.Ration;
 import com.adwhirl.util.AdWhirlUtil;
 
-import android.util.Log;
-
 public class GenericAdapter extends AdWhirlAdapter {
-  public GenericAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-    super(adWhirlLayout, ration);
-  }
-
-  @Override
-  public void handle() {
-    Log.d(AdWhirlUtil.ADWHIRL, "Generic notification request initiated");
-
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+    public GenericAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
+        super(adWhirlLayout, ration);
     }
 
-    // If the user set a handler for notifications, call it
-    if (adWhirlLayout.adWhirlInterface != null) {
-      adWhirlLayout.adWhirlInterface.adWhirlGeneric();
-    } else {
-      Log.w(AdWhirlUtil.ADWHIRL,
-          "Generic notification sent, but no interface is listening");
-    }
+    @Override
+    public void handle() {
+        Log.d(AdWhirlUtil.ADWHIRL, "Generic notification request initiated");
 
-    adWhirlLayout.adWhirlManager.resetRollover();
-    adWhirlLayout.rotateThreadedDelayed();
-  }
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
+
+        // If the user set a handler for notifications, call it
+        if (adWhirlLayout.adWhirlInterface != null) {
+            adWhirlLayout.adWhirlInterface.adWhirlGeneric();
+        } else {
+            Log.w(AdWhirlUtil.ADWHIRL,
+                "Generic notification sent, but no interface is listening");
+        }
+
+        adWhirlLayout.adWhirlManager.resetRollover();
+        adWhirlLayout.rotateThreadedDelayed();
+    }
 }

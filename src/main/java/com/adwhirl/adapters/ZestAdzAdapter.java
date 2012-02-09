@@ -16,6 +16,8 @@
 
 package com.adwhirl.adapters;
 
+import android.app.Activity;
+import android.util.Log;
 import com.adwhirl.AdWhirlLayout;
 import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
 import com.adwhirl.obj.Ration;
@@ -24,70 +26,68 @@ import com.zestadz.android.AdManager;
 import com.zestadz.android.ZestADZAdView;
 import com.zestadz.android.ZestADZAdView.ZestADZListener;
 
-import android.app.Activity;
-import android.util.Log;
-
 public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
-  public ZestAdzAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-    super(adWhirlLayout, ration);
-  }
-
-  @Override
-  public void handle() {
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+    public ZestAdzAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
+        super(adWhirlLayout, ration);
     }
 
-    try {
-      AdManager.setadclientId(ration.key);
-    }
-    // Thrown on invalid client id.
-    catch (IllegalArgumentException e) {
-      adWhirlLayout.rollover();
-      return;
-    }
+    @Override
+    public void handle() {
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
 
-    try {
-      Activity activity = adWhirlLayout.activityReference.get();
-      if (activity == null) {
-        return;
-      }
+        try {
+            AdManager.setadclientId(ration.key);
+        }
+        // Thrown on invalid client id.
+        catch (IllegalArgumentException e) {
+            adWhirlLayout.rollover();
+            return;
+        }
 
-      ZestADZAdView adView = new ZestADZAdView(activity);
-      adView.setListener(this);
-      adView.displayAd();
-    } catch (Exception e) {
-      adWhirlLayout.rollover();
-    }
-  }
+        try {
+            Activity activity = adWhirlLayout.activityReference.get();
+            if (activity == null) {
+                return;
+            }
 
-  // This block contains the ZestADZ listeners
-  /*******************************************************************/
-  public void AdReturned(ZestADZAdView adView) {
-    Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ success");
-
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+            ZestADZAdView adView = new ZestADZAdView(activity);
+            adView.setListener(this);
+            adView.displayAd();
+        } catch (Exception e) {
+            adWhirlLayout.rollover();
+        }
     }
 
-    adWhirlLayout.adWhirlManager.resetRollover();
-    adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-    adWhirlLayout.rotateThreadedDelayed();
-  }
+    // This block contains the ZestADZ listeners
 
-  public void AdFailed(ZestADZAdView adView) {
-    Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ failure");
+    /** *************************************************************** */
+    public void AdReturned(ZestADZAdView adView) {
+        Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ success");
 
-    adView.setListener(null);
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
 
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+        adWhirlLayout.adWhirlManager.resetRollover();
+        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
+        adWhirlLayout.rotateThreadedDelayed();
     }
 
-    adWhirlLayout.rollover();
-  }
+    public void AdFailed(ZestADZAdView adView) {
+        Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ failure");
+
+        adView.setListener(null);
+
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
+
+        adWhirlLayout.rollover();
+    }
 
 }

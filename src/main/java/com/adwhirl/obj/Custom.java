@@ -19,13 +19,13 @@ package com.adwhirl.obj;
 import android.graphics.drawable.Drawable;
 
 public class Custom {
-  public int type;
-  public String link;
-  public Drawable image;
-  public String imageLink;
-  public String imageLink480x75;
-  public String description;
+    public int type;
+    public String link;
+    public Drawable image;
+    public String imageLink;
+    public String imageLink480x75;
+    public String description;
 
-  public Custom() {
-  }
+    public Custom() {
+    }
 }

@@ -1,8 +1,10 @@
 package com.adwhirl.adapters;
 
+import android.app.Activity;
+import android.util.Log;
 import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlTargeting;
 import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
+import com.adwhirl.AdWhirlTargeting;
 import com.adwhirl.AdWhirlTargeting.Gender;
 import com.adwhirl.obj.Extra;
 import com.adwhirl.obj.Ration;
@@ -13,107 +15,104 @@ import com.inmobi.androidsdk.IMAdRequest.ErrorCode;
 import com.inmobi.androidsdk.IMAdRequest.GenderType;
 import com.inmobi.androidsdk.IMAdView;
 
-import android.app.Activity;
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * An adapter for the InMobi Android SDK.
- * 
+ * <p/>
  * Note: The InMobi site Id is looked up using ration.key
  */
 
 public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener {
-  private Extra extra = null;
-  public int adUnit = IMAdView.INMOBI_AD_UNIT_320X50; //default size 15
+    private Extra extra = null;
+    public int adUnit = IMAdView.INMOBI_AD_UNIT_320X50; //default size 15
 
-  public InMobiAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-    super(adWhirlLayout, ration);
-    extra = adWhirlLayout.extra;
-  }
-
-  @Override
-  public void handle() {
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+    public InMobiAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
+        super(adWhirlLayout, ration);
+        extra = adWhirlLayout.extra;
     }
 
-    Activity activity = adWhirlLayout.activityReference.get();
-    if (activity == null) {
-      return;
+    @Override
+    public void handle() {
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
+
+        Activity activity = adWhirlLayout.activityReference.get();
+        if (activity == null) {
+            return;
+        }
+
+        IMAdView adView = new IMAdView(activity, adUnit, ration.key);
+        adView.setIMAdListener(this);
+        IMAdRequest imAdRequest = new IMAdRequest();
+        imAdRequest.setAge(AdWhirlTargeting.getAge());
+        imAdRequest.setGender(this.getGender());
+        imAdRequest.setLocationInquiryAllowed(this.isLocationInquiryAllowed());
+        imAdRequest.setTestMode(AdWhirlTargeting.getTestMode());
+        imAdRequest.setKeywords(AdWhirlTargeting.getKeywords());
+        imAdRequest.setPostalCode(AdWhirlTargeting.getPostalCode());
+
+        // Setting tp key based on InMobi's implementation of this adapter.
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("tp", "c_adwhirl");
+        imAdRequest.setRequestParams(map);
+
+        // Set the auto refresh off.
+        adView.setRefreshInterval(IMAdView.REFRESH_INTERVAL_OFF);
+        adView.loadNewAd(imAdRequest);
     }
 
-    IMAdView adView = new IMAdView(activity, adUnit, ration.key);
-    adView.setIMAdListener(this);
-    IMAdRequest imAdRequest = new IMAdRequest();
-    imAdRequest.setAge(AdWhirlTargeting.getAge());
-    imAdRequest.setGender(this.getGender());
-    imAdRequest.setLocationInquiryAllowed(this.isLocationInquiryAllowed());
-    imAdRequest.setTestMode(AdWhirlTargeting.getTestMode());
-    imAdRequest.setKeywords(AdWhirlTargeting.getKeywords());
-    imAdRequest.setPostalCode(AdWhirlTargeting.getPostalCode());
-    
-    // Setting tp key based on InMobi's implementation of this adapter.
-    Map<String, String> map = new HashMap<String, String>();
-    map.put("tp", "c_adwhirl");
-    imAdRequest.setRequestParams(map);
+    @Override
+    public void onAdRequestCompleted(IMAdView adView) {
+        Log.d(AdWhirlUtil.ADWHIRL, "InMobi success");
 
-    // Set the auto refresh off.
-    adView.setRefreshInterval(IMAdView.REFRESH_INTERVAL_OFF);
-    adView.loadNewAd(imAdRequest);
-  }
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
 
-  @Override
-  public void onAdRequestCompleted(IMAdView adView) {
-    Log.d(AdWhirlUtil.ADWHIRL, "InMobi success");
-
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+        adWhirlLayout.adWhirlManager.resetRollover();
+        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
+        adWhirlLayout.rotateThreadedDelayed();
     }
 
-    adWhirlLayout.adWhirlManager.resetRollover();
-    adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-    adWhirlLayout.rotateThreadedDelayed();
-  }
-
-  @Override
-  public void onAdRequestFailed(IMAdView adView, ErrorCode errorCode) {
-    Log.d(AdWhirlUtil.ADWHIRL, "InMobi failure (" + errorCode + ")");
-    AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-    if (adWhirlLayout == null) {
-      return;
+    @Override
+    public void onAdRequestFailed(IMAdView adView, ErrorCode errorCode) {
+        Log.d(AdWhirlUtil.ADWHIRL, "InMobi failure (" + errorCode + ")");
+        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        if (adWhirlLayout == null) {
+            return;
+        }
+        adWhirlLayout.rollover();
     }
-    adWhirlLayout.rollover();
-  }
-  
-  @Override
-  public void onShowAdScreen(IMAdView adView) {
-  }
 
-  @Override
-  public void onDismissAdScreen(IMAdView adView) {
-  }
+    @Override
+    public void onShowAdScreen(IMAdView adView) {
+    }
 
-  public GenderType getGender() {
-    Gender gender = AdWhirlTargeting.getGender();
-    if (Gender.MALE == gender) {
-      return GenderType.MALE;
+    @Override
+    public void onDismissAdScreen(IMAdView adView) {
     }
-    if (Gender.FEMALE == gender) {
-      return GenderType.FEMALE;
-    }
-    return GenderType.NONE;
-  }
 
-  public boolean isLocationInquiryAllowed() {
-    if (extra.locationOn == 1) {
-      return true;
-    } else {
-      return false;
+    public GenderType getGender() {
+        Gender gender = AdWhirlTargeting.getGender();
+        if (Gender.MALE == gender) {
+            return GenderType.MALE;
+        }
+        if (Gender.FEMALE == gender) {
+            return GenderType.FEMALE;
+        }
+        return GenderType.NONE;
     }
-  }
+
+    public boolean isLocationInquiryAllowed() {
+        if (extra.locationOn == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

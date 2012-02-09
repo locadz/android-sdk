@@ -17,25 +17,25 @@
 package com.adwhirl.obj;
 
 public class Ration implements Comparable<Ration> {
-  public String nid = "";
-  public int type = 0;
-  public String name = "";
-  public double weight = 0;
-  public String key = "";
-  public String key2 = "";
-  public int priority = 0;
+    public String nid = "";
+    public int type = 0;
+    public String name = "";
+    public double weight = 0;
+    public String key = "";
+    public String key2 = "";
+    public int priority = 0;
 
-  public Ration() {
-  }
-
-  public int compareTo(Ration another) {
-    int otherPriority = another.priority;
-    if (this.priority < otherPriority) {
-      return -1;
-    } else if (this.priority > otherPriority) {
-      return 1;
-    } else {
-      return 0;
+    public Ration() {
     }
-  }
+
+    public int compareTo(Ration another) {
+        int otherPriority = another.priority;
+        if (this.priority < otherPriority) {
+            return -1;
+        } else if (this.priority > otherPriority) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 }
