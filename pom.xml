@@ -16,6 +16,7 @@
 
   <properties>
     <version.android.sdk>2.1.2</version.android.sdk>
+    <version.jackson>1.9.2</version.jackson>
   </properties>
 
   <build>
@@ -32,7 +33,6 @@
           <sdk>
             <platform>8</platform>
           </sdk>
-          <deleteConflictingFiles>true</deleteConflictingFiles>
           <undeployBeforeDeploy>true</undeployBeforeDeploy>
         </configuration>
         <extensions>true</extensions>
@@ -68,6 +68,28 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- jackson for json serialization.-->
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>${version.jackson}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>${version.jackson}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-xc</artifactId>
+      <version>${version.jackson}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-jaxrs</artifactId>
+      <version>${version.jackson}</version>
+    </dependency>
+    <!-- end of jackson -->
 
     <dependency>
       <groupId>com.google</groupId>
@@ -123,8 +145,32 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/zestadz_sdk_androidv1.2.jar</systemPath>
     </dependency>
-
+    <dependency>
+      <groupId>com.vpon</groupId>
+      <artifactId>android</artifactId>
+      <version>3.0.3</version>
+      <optional>true</optional>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/AdOn-3.0.3.jar</systemPath>
+    </dependency>
+    <dependency>
+         <groupId>com.pivotallabs</groupId>
+         <artifactId>robolectric</artifactId>
+         <version>1.0</version>
+         <scope>test</scope>
+     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.8.2</version>
+    </dependency>
   </dependencies>
 
+  <repositories>
+    <repository>
+      <id>sonatype-oss</id>
+      <url>https://oss.sonatype.org/content/repositories/releases</url>
+    </repository>
+  </repositories>
 
 </project>
