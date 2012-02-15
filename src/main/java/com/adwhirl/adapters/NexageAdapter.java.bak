@@ -115,7 +115,7 @@ public class NexageAdapter extends AdWhirlAdapter implements NexageListener {
 
   @Override
   public void onFailedToReceiveAd(NexageAdView adView) {
-    Log.d(AdWhirlUtil.ADWHIRL, "Nexage failure");
+    Log.d(LocadzUtils.LOGID, "Nexage failure");
 
     adView.setListener(null);
 
@@ -129,7 +129,7 @@ public class NexageAdapter extends AdWhirlAdapter implements NexageListener {
 
   @Override
   public void onReceiveAd(NexageAdView adView) {
-    Log.d(AdWhirlUtil.ADWHIRL, "Nexage success");
+    Log.d(LocadzUtils.LOGID, "Nexage success");
 
     AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
     if (adWhirlLayout == null) {

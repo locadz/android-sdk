@@ -17,15 +17,15 @@
 package com.adwhirl.adapters;
 
 import android.app.Activity;
+import android.location.Location;
 import android.text.TextUtils;
 import android.util.Log;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
 import com.adwhirl.AdWhirlTargeting;
 import com.adwhirl.AdWhirlTargeting.Gender;
-import com.adwhirl.obj.Extra;
-import com.adwhirl.obj.Ration;
-import com.adwhirl.util.AdWhirlUtil;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 import com.millennialmedia.android.MMAdView;
 import com.millennialmedia.android.MMAdView.MMAdListener;
 import com.millennialmedia.android.MMAdViewSDK;
@@ -33,14 +33,16 @@ import com.millennialmedia.android.MMAdViewSDK;
 import java.util.Hashtable;
 
 public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
-    public MillennialAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
+
+    public MillennialAdapter(AdUnitLayout locadzLayout, Ration ration, Extra extra) {
+        super(locadzLayout, ration, extra);
     }
+
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
@@ -73,15 +75,15 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
         map.put(MMAdView.KEY_VENDOR, "adwhirl");
 
         // Instantiate an ad view and add it to the view
-        MMAdView adView = new MMAdView((Activity) adWhirlLayout.getContext(),
-            ration.key, MMAdView.BANNER_AD_TOP, MMAdView.REFRESH_INTERVAL_OFF, map);
+        MMAdView adView = new MMAdView((Activity) locadzLayout.getContext(),
+            ration.getKey(), MMAdView.BANNER_AD_TOP, MMAdView.REFRESH_INTERVAL_OFF, map);
         adView.setId(MMAdViewSDK.DEFAULT_VIEWID);
         adView.setListener(this);
         adView.callForAd();
 
-        Extra extra = adWhirlLayout.extra;
-        if (extra.locationOn == 1 && adWhirlLayout.adWhirlManager.location != null) {
-            adView.updateUserLocation(adWhirlLayout.adWhirlManager.location);
+        Location currentLocation = locadzLayout.getAdUnitContext().getLocation();
+        if (getExtra().isLocationOn() == true && currentLocation != null) {
+            adView.updateUserLocation(currentLocation);
         }
 
         adView.setHorizontalScrollBarEnabled(false);
@@ -89,41 +91,36 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
     }
 
     public void MMAdReturned(MMAdView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "Millennial success");
+        Log.d(LocadzUtils.LOGID, "Millennial success");
         adView.setListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
-
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 
     public void MMAdFailed(MMAdView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "Millennial failure");
+        Log.d(LocadzUtils.LOGID, "Millennial failure");
         adView.setListener(null);
-
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
-
-        adWhirlLayout.rollover();
+        locadzLayout.submitReloadAdRequest();
     }
 
     public void MMAdClickedToNewBrowser(MMAdView adview) {
-        Log.d(AdWhirlUtil.ADWHIRL, "Millennial Ad clicked, new browser launched");
+        Log.d(LocadzUtils.LOGID, "Millennial Ad clicked, new browser launched");
     }
 
     public void MMAdClickedToOverlay(MMAdView adview) {
-        Log.d(AdWhirlUtil.ADWHIRL, "Millennial Ad Clicked to overlay");
+        Log.d(LocadzUtils.LOGID, "Millennial Ad Clicked to overlay");
     }
 
     public void MMAdOverlayLaunched(MMAdView adview) {
-        Log.d(AdWhirlUtil.ADWHIRL, "Millennial Ad Overlay Launched");
+        Log.d(LocadzUtils.LOGID, "Millennial Ad Overlay Launched");
     }
 
     public void MMAdRequestIsCaching(MMAdView adView) {

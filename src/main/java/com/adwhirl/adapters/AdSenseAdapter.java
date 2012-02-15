@@ -8,17 +8,17 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
 import com.adwhirl.AdWhirlTargeting;
-import com.adwhirl.obj.Extra;
-import com.adwhirl.obj.Ration;
-import com.adwhirl.util.AdWhirlUtil;
 import com.google.ads.AdSenseSpec;
 import com.google.ads.AdSenseSpec.AdFormat;
 import com.google.ads.AdSenseSpec.ExpandDirection;
 import com.google.ads.AdViewListener;
 import com.google.ads.GoogleAdView;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Color;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,31 +26,31 @@ import java.util.List;
 public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
     private GoogleAdView adView;
 
-    public AdSenseAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
+    public AdSenseAdapter(AdUnitLayout layout, Ration ration, Extra extra) {
+        super(layout, ration, extra);
     }
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (isVisible() == false || locadzLayout == null) {
             return;
         }
 
-        String clientId = ration.key;
+        String clientId = ration.getKey();
 
         if (clientId == null || !clientId.startsWith("ca-mb-app-pub-")) {
             // Invalid publisher ID
-            Log.w(AdWhirlUtil.ADWHIRL, "Invalid AdSense client ID");
-            adWhirlLayout.rollover();
+            Log.w(LocadzUtils.LOGID, "Invalid AdSense client ID");
+            rollover();
             return;
         }
         if (TextUtils.isEmpty(googleAdSenseCompanyName)
             || TextUtils.isEmpty(googleAdSenseAppName)) {
             // Missing required parameters
-            Log.w(AdWhirlUtil.ADWHIRL,
+            Log.w(LocadzUtils.LOGID,
                 "AdSense company name and app name are required parameters");
-            adWhirlLayout.rollover();
+            rollover();
             return;
         }
 
@@ -66,11 +66,11 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
         boolean testMode = AdWhirlTargeting.getTestMode();
         spec.setAdTestEnabled(testMode);
 
-        adView = new GoogleAdView(adWhirlLayout.getContext());
+        adView = new GoogleAdView(locadzLayout.getContext());
         adView.setAdViewListener(this);
 
-        Extra extra = adWhirlLayout.extra;
-        spec.setColorBackground(rgbToHex(extra.bgRed, extra.bgGreen, extra.bgBlue));
+        Color bgColor = getExtra().getBackgroundColor();
+        spec.setColorBackground(rgbToHex(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()));
 
         final AdWhirlTargeting.Gender gender = AdWhirlTargeting.getGender();
         spec.setGender(gender);
@@ -88,7 +88,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
         // According to AdSense guidelines, we cannot display an expandable ad in a
         // ListView or ScrollView
         boolean canExpand = true;
-        ViewParent p = adWhirlLayout.getParent();
+        ViewParent p = locadzLayout.getParent();
         if (p == null) {
             // Null parent may indicate that the ad is inside of a ListView header
             canExpand = false;
@@ -115,7 +115,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
 
         // The GoogleAdView has to be in the view hierarchy to make a request
         adView.setVisibility(View.INVISIBLE);
-        adWhirlLayout.addView(adView, new LayoutParams(LayoutParams.WRAP_CONTENT,
+        locadzLayout.addView(adView, new LayoutParams(LayoutParams.WRAP_CONTENT,
             LayoutParams.WRAP_CONTENT));
 
         adView.showAds(spec);
@@ -128,35 +128,33 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
     }
 
     public void onFinishFetchAd() {
-        Log.d(AdWhirlUtil.ADWHIRL, "AdSense success");
+        Log.d(LocadzUtils.LOGID, "AdSense success");
         adView.setAdViewListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.removeView(adView);
+        locadzLayout.removeView(adView);
         adView.setVisibility(View.VISIBLE);
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 
     public void onClickAd() {
     }
 
     public void onAdFetchFailure() {
-        Log.d(AdWhirlUtil.ADWHIRL, "AdSense failure");
+        Log.d(LocadzUtils.LOGID, "AdSense failure");
         adView.setAdViewListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.removeView(adView);
-        adWhirlLayout.rollover();
+        locadzLayout.removeView(adView);
+        locadzLayout.submitReloadAdRequest();
     }
 
     /** *************************************************************** */

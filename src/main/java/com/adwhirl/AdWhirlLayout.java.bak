@@ -49,8 +49,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Core UI component for AdWhirl.
+ */
 public class AdWhirlLayout extends RelativeLayout {
+
+    /** the resource bundle property name of the API_KEY */
     public static final String ADWHIRL_KEY = "ADWHIRL_KEY";
+
+    /** soft-reference for the surrounding activity */
     public WeakReference<Activity> activityReference;
 
     // Only the UI thread can update the UI, so we need this for UI callbacks
@@ -64,7 +71,15 @@ public class AdWhirlLayout extends RelativeLayout {
     public Extra extra;
 
     // The current custom ad
-    public Custom custom;
+    private Custom custom;
+
+    public void setCustom(Custom custom) {
+        this.custom = custom;
+    }
+
+    public Custom getCustom() {
+        return custom;
+    }
 
     // This is just so our threads can reference us explicitly
     public WeakReference<RelativeLayout> superViewReference;
@@ -80,26 +95,49 @@ public class AdWhirlLayout extends RelativeLayout {
 
     public AdWhirlManager adWhirlManager;
 
+    /** indicate whether the current activity is visible or not. */
     private boolean hasWindow;
+
+    /** indicate whether a new ad should be scheduled to fetch or not.  */
     private boolean isScheduled;
 
+    /** max width of this layout. */
     private int maxWidth;
 
+    /**
+     * Sets the max width of this layout.
+     * @param width the max width this layout should use.
+     */
     public void setMaxWidth(int width) {
         maxWidth = width;
     }
 
+    /** max height of this layout. */
     private int maxHeight;
 
+    /**
+     * Sets the max height of this layout.
+     * @param height the max height this layout should use.
+     */
     public void setMaxHeight(int height) {
         maxHeight = height;
     }
 
+    /**
+     * Constructor.
+     * @param context       the surrounding activity this layout belong to.
+     * @param keyAdWhirl    the apikey. this value take precedence over the key configured in bundle.
+     */
     public AdWhirlLayout(final Activity context, final String keyAdWhirl) {
         super(context);
         init(context, keyAdWhirl);
     }
 
+    /**
+     * Constructor.
+     * @param context       the surrounding activity this layout belong to.
+     * @param attrs         extra configurations.
+     */
     public AdWhirlLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         // Retrieves AdWhirl key.
@@ -107,7 +145,12 @@ public class AdWhirlLayout extends RelativeLayout {
         init((Activity) context, key);
     }
 
-    protected String getAdWhirlKey(Context context) {
+    /**
+     * Retrieve api key from the context.
+     * @param context   the context.
+     * @return  the api key or null.
+     */
+    protected static String getAdWhirlKey(Context context) {
         final String packageName = context.getPackageName();
         final String activityName = context.getClass().getName();
         final PackageManager pm = context.getPackageManager();
@@ -140,6 +183,11 @@ public class AdWhirlLayout extends RelativeLayout {
         return null;
     }
 
+    /**
+     * Initialize this layout.
+     * @param context       the context to use.
+     * @param keyAdWhirl    the apikey to use.
+     */
     protected void init(final Activity context, final String keyAdWhirl) {
         this.activityReference = new WeakReference<Activity>(context);
         this.superViewReference = new WeakReference<RelativeLayout>(this);
@@ -155,24 +203,25 @@ public class AdWhirlLayout extends RelativeLayout {
         this.maxHeight = 0;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
         if (maxWidth > 0 && widthSize > maxWidth) {
-            widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxWidth,
-                MeasureSpec.AT_MOST);
+            widthMeasureSpec = MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST);
         }
 
         if (maxHeight > 0 && heightSize > maxHeight) {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight,
-                MeasureSpec.AT_MOST);
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
         }
 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        setMeasuredDimension(getMeasuredWidth(), getMeasuredHeight());
     }
 
+    /** {@inheritDoc} */
     @Override
     protected void onWindowVisibilityChanged(int visibility) {
         if (visibility == VISIBLE) {
@@ -192,6 +241,9 @@ public class AdWhirlLayout extends RelativeLayout {
         }
     }
 
+    /**
+     * Invoke to rotate the AD.
+     */
     private void rotateAd() {
         if (!this.hasWindow) {
             this.isScheduled = false;
@@ -248,7 +300,9 @@ public class AdWhirlLayout extends RelativeLayout {
             TimeUnit.SECONDS);
     }
 
-    // Remove old views and push the new one
+    /**
+     *  Remove old views and push the new one.
+     */
     public void pushSubView(ViewGroup subView) {
         RelativeLayout superView = superViewReference.get();
         if (superView == null) {
@@ -304,10 +358,9 @@ public class AdWhirlLayout extends RelativeLayout {
                 if (activeRation != null) {
                     countClick();
 
-                    if (activeRation.type == 9) {
+                    if (activeRation.type == AdWhirlUtil.NETWORK_TYPE_CUSTOM) {
                         if (custom != null && custom.link != null) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri
-                                .parse(custom.link));
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(custom.link));
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             try {
                                 if (activityReference == null) {
@@ -319,13 +372,10 @@ public class AdWhirlLayout extends RelativeLayout {
                                 }
                                 activity.startActivity(intent);
                             } catch (Exception e) {
-                                Log.w(AdWhirlUtil.ADWHIRL, "Could not handle click to "
-                                    + custom.link, e);
+                                Log.w(AdWhirlUtil.ADWHIRL, "Could not handle click to " + custom.link, e);
                             }
                         } else {
-                            Log
-                                .w(AdWhirlUtil.ADWHIRL,
-                                    "In onInterceptTouchEvent(), but custom or custom.link is null");
+                            Log.w(AdWhirlUtil.ADWHIRL, "In onInterceptTouchEvent(), but custom or custom.link is null");
                         }
                     }
                     break;

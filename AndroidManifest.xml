@@ -18,7 +18,7 @@
         </activity>
         <!-- AdMob integration -->
         <activity android:name="com.google.ads.AdActivity"
-                  android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|uiMode" />
+                  android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|uiMode|screenSize|smallestScreenSize" />
         <!-- MdotM integration -->
         <activity android:name="com.mdotm.android.ads.MdotmLandingPage"
                   android:label="@string/app_name" >
@@ -37,9 +37,11 @@
         <!-- If both Activity-specific and App-wide AdWhirl Keys are specified, the
              Activity-specific key will override the App-wide key. -->
         <!-- If Activity-specific key is omitted, the App-wide key will be used. -->
-        <meta-data android:value="643eb700781e4f47b017ea27d1aba3be" android:name="ADWHIRL_KEY" />
+        <meta-data android:value="643eb700781e4f47b017ea27d1aba3be" android:name="ADUNIT" />
+        <service android:enabled="true" android:name="com.locadz.ConfigService"/>
+        <service android:enabled="true" android:name="com.locadz.MockConfigService"/>
     </application>
-    <uses-sdk android:minSdkVersion="3" />
+    <uses-sdk android:minSdkVersion="8" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />

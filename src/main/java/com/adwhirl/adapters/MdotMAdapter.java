@@ -4,78 +4,78 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
-import com.adwhirl.obj.Extra;
-import com.adwhirl.obj.Ration;
 import com.adwhirl.util.AdWhirlUtil;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Ration;
 import com.mdotm.android.ads.MdotMManager;
 import com.mdotm.android.ads.MdotMView;
 import com.mdotm.android.ads.MdotMView.MdotMActionListener;
 
-/** This file was provided by MdotM. Please contact support@mdotm.com with any questions or concerns. */
 public class MdotMAdapter extends AdWhirlAdapter implements MdotMActionListener {
-    public MdotMAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
+
+    public MdotMAdapter(AdUnitLayout locadzLayout, Ration ration, com.locadz.model.Extra extra) {
+        super(locadzLayout, ration, extra);
     }
+
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
         try {
-            String ration_key = this.ration.key;
+            String ration_key = ration.getKey();
             MdotMManager.setPublisherId(ration_key);
             MdotMManager.setMediationLayerName(AdWhirlUtil.ADWHIRL);
             MdotMManager.setMediationLayerVersion(AdWhirlUtil.VERSION);
         }
         // Thrown on invalid publisher id
         catch (IllegalArgumentException e) {
-            adWhirlLayout.rollover();
+            locadzLayout.submitReloadAdRequest();
             return;
         }
 
-        Activity activity = adWhirlLayout.activityReference.get();
+        Activity activity = locadzLayout.getActivity();
         if (activity == null) {
             return;
         }
         MdotMView mdotm = new MdotMView(activity, this);
 
         mdotm.setListener(this);
-        Extra extra = adWhirlLayout.extra;
-        int bgColor = Color.rgb(extra.bgRed, extra.bgGreen, extra.bgBlue);
-        int fgColor = Color.rgb(extra.fgRed, extra.fgGreen, extra.fgBlue);
+        com.locadz.model.Color bg = getExtra().getBackgroundColor();
+        com.locadz.model.Color fg = getExtra().getTextColor();
+
+        int bgColor = Color.rgb(bg.getRed(), bg.getGreen(), bg.getBlue());
+        int fgColor = Color.rgb(fg.getRed(), fg.getGreen(), fg.getBlue());
 
         mdotm.setBackgroundColor(bgColor);
         mdotm.setTextColor(fgColor);
     }
 
     public void adRequestCompletedSuccessfully(MdotMView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "MdotM success");
+        Log.d(LocadzUtils.LOGID, "MdotM success");
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
         adView.setListener(null);
         adView.setVisibility(View.VISIBLE);
 
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 
     public void adRequestFailed(MdotMView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "MdotM failure");
+        Log.d(LocadzUtils.LOGID, "MdotM failure");
         adView.setListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
-        adWhirlLayout.rollover();
+        locadzLayout.submitReloadAdRequest();
     }
 }

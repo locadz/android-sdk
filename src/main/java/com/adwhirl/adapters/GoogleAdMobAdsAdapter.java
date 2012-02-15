@@ -19,10 +19,7 @@ package com.adwhirl.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
 import com.adwhirl.AdWhirlTargeting;
-import com.adwhirl.obj.Ration;
 import com.adwhirl.util.AdWhirlUtil;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
@@ -30,14 +27,19 @@ import com.google.ads.AdRequest;
 import com.google.ads.AdRequest.ErrorCode;
 import com.google.ads.AdSize;
 import com.google.ads.AdView;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 
 import java.text.SimpleDateFormat;
 
 public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener {
+
     private AdView adView;
 
-    public GoogleAdMobAdsAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
+    public GoogleAdMobAdsAdapter(AdUnitLayout locadzLayout, Ration ration, Extra extra) {
+        super(locadzLayout, ration, extra);
     }
 
     protected String birthdayForAdWhirlTargeting() {
@@ -59,21 +61,21 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        AdUnitLayout locadzLayout = getLocadzLayout();
 
-        if (adWhirlLayout == null) {
+        if (locadzLayout == null) {
             return;
         }
 
-        Activity activity = adWhirlLayout.activityReference.get();
+        Activity activity = locadzLayout.getActivity();
         if (activity == null) {
             return;
         }
 
-        adView = new AdView(activity, AdSize.BANNER, ration.key);
+        adView = new AdView(activity, AdSize.BANNER, ration.getKey());
 
         adView.setAdListener(this);
-        adView.loadAd(requestForAdWhirlLayout(adWhirlLayout));
+        adView.loadAd(requestForAdWhirlLayout(locadzLayout));
     }
 
     @Override
@@ -85,14 +87,18 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
     }
 
     protected void log(String message) {
-        Log.d(AdWhirlUtil.ADWHIRL, "GoogleAdapter " + message);
+        Log.d(LocadzUtils.LOGID, "GoogleAdapter " + message);
     }
 
-    protected AdRequest requestForAdWhirlLayout(AdWhirlLayout layout) {
+    protected AdRequest requestForAdWhirlLayout(AdUnitLayout layout) {
         AdRequest result = new AdRequest();
 
         if (AdWhirlTargeting.getTestMode()) {
-            Activity activity = layout.activityReference.get();
+            result.addTestDevice(AdRequest.TEST_EMULATOR);
+        }
+
+        if (AdWhirlTargeting.getTestMode()) {
+            Activity activity = layout.getActivity();
             if (activity != null) {
                 Context context = activity.getApplicationContext();
                 String deviceId = AdWhirlUtil.getEncodedDeviceId(context);
@@ -102,8 +108,8 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
         result.setGender(genderForAdWhirlTargeting());
         result.setBirthday(birthdayForAdWhirlTargeting());
 
-        if (layout.extra.locationOn == 1) {
-            result.setLocation(layout.adWhirlManager.location);
+        if (getExtra().isLocationOn()) {
+            result.setLocation(layout.getAdUnitContext().getLocation());
         }
 
         result.setKeywords(AdWhirlTargeting.getKeywordSet());
@@ -121,13 +127,13 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
 
         arg0.setAdListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        AdUnitLayout locadzLayout = getLocadzLayout();
 
-        if (adWhirlLayout == null) {
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.rollover();
+        locadzLayout.submitReloadAdRequest();
     }
 
     @Override
@@ -142,9 +148,9 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
     public void onReceiveAd(Ad arg0) {
         log("success");
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
+        AdUnitLayout locadzLayout = getLocadzLayout();
 
-        if (adWhirlLayout == null) {
+        if (locadzLayout == null) {
             return;
         }
 
@@ -154,9 +160,6 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
         }
 
         AdView adView = (AdView) arg0;
-
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 }

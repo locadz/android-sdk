@@ -18,37 +18,38 @@ package com.adwhirl.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
-import com.adwhirl.obj.Ration;
-import com.adwhirl.util.AdWhirlUtil;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 import com.zestadz.android.AdManager;
 import com.zestadz.android.ZestADZAdView;
 import com.zestadz.android.ZestADZAdView.ZestADZListener;
 
 public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
-    public ZestAdzAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
+
+    public ZestAdzAdapter(AdUnitLayout locadzLayout, Ration ration, Extra extra) {
+        super(locadzLayout, ration, extra);
     }
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
         try {
-            AdManager.setadclientId(ration.key);
+            AdManager.setadclientId(ration.getKey());
         }
         // Thrown on invalid client id.
         catch (IllegalArgumentException e) {
-            adWhirlLayout.rollover();
+            locadzLayout.submitReloadAdRequest();
             return;
         }
 
         try {
-            Activity activity = adWhirlLayout.activityReference.get();
+            Activity activity = locadzLayout.getActivity();
             if (activity == null) {
                 return;
             }
@@ -57,7 +58,7 @@ public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
             adView.setListener(this);
             adView.displayAd();
         } catch (Exception e) {
-            adWhirlLayout.rollover();
+            locadzLayout.submitReloadAdRequest();
         }
     }
 
@@ -65,29 +66,27 @@ public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
 
     /** *************************************************************** */
     public void AdReturned(ZestADZAdView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ success");
+        Log.d(LocadzUtils.LOGID, "ZestADZ success");
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 
     public void AdFailed(ZestADZAdView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "ZestADZ failure");
+        Log.d(LocadzUtils.LOGID, "ZestADZ failure");
 
         adView.setListener(null);
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.rollover();
+        locadzLayout.submitReloadAdRequest();
     }
 
 }

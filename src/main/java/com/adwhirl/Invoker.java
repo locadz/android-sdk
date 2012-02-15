@@ -21,18 +21,17 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import com.adwhirl.AdWhirlLayout.AdWhirlInterface;
 import com.adwhirl.adapters.AdWhirlAdapter;
 import com.adwhirl.util.AdWhirlUtil;
+import com.locadz.AdUnitLayout;
 
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Invoker extends Activity implements AdWhirlInterface {
+public class Invoker extends Activity {
     // For more easily detecting memory leaks.
     // byte[] garbage = new byte[1000 * 1024];
 
@@ -72,25 +71,19 @@ public class Invoker extends Activity implements AdWhirlInterface {
         AdWhirlAdapter.setGoogleAdSenseCompanyName("AdWhirl");
 
         // Optional, will fetch new config if necessary after five minutes.
-        AdWhirlManager.setConfigExpireTimeout(1000 * 60 * 5);
+        // AdWhirlManager.setConfigExpireTimeout(1000 * 60 * 5);
 
         // References AdWhirlLayout defined in the layout XML.
-        AdWhirlLayout adWhirlLayout = (AdWhirlLayout) findViewById(R.id.adwhirl_layout);
-        adWhirlLayout.setAdWhirlInterface(this);
-        adWhirlLayout.setMaxWidth(width);
-        adWhirlLayout.setMaxHeight(height);
+
 
         // Instantiates AdWhirlLayout from code.
         // Note: Showing two ads on the same screen is for illustrative purposes
         // only.
         // You should check with ad networks on their specific policies.
-        AdWhirlLayout adWhirlLayout2 = new AdWhirlLayout(this,
-            "46a9e26bb1f5499ab7b00c9807ae034b");
-        adWhirlLayout2.setAdWhirlInterface(this);
-        adWhirlLayout2.setMaxWidth(width);
-        adWhirlLayout2.setMaxHeight(height);
+        AdUnitLayout adWhirlLayout2 = new AdUnitLayout(this, "46a9e26bb1f5499ab7b00c9807ae034b");
+
         RelativeLayout.LayoutParams adWhirlLayoutParams = new RelativeLayout.LayoutParams(
-            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+            RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         adWhirlLayoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
         layout.addView(adWhirlLayout2, adWhirlLayoutParams);

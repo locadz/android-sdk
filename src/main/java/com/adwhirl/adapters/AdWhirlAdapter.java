@@ -17,32 +17,57 @@
 package com.adwhirl.adapters;
 
 import android.util.Log;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.obj.Ration;
 import com.adwhirl.util.AdWhirlUtil;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AdWhirlAdapter {
-    protected final WeakReference<AdWhirlLayout> adWhirlLayoutReference;
-    protected Ration ration;
+    
+    private final WeakReference<AdUnitLayout> layoutReference;
+    protected final Ration ration;
 
-    public AdWhirlAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        this.adWhirlLayoutReference = new WeakReference<AdWhirlLayout>(
-            adWhirlLayout);
+    protected final Extra extra;
+    
+    public AdWhirlAdapter(AdUnitLayout layout, Ration ration, Extra extra) {
+        this.layoutReference = new WeakReference<AdUnitLayout>(layout);
         this.ration = ration;
+        this.extra = extra;
     }
 
-    private static AdWhirlAdapter getAdapter(AdWhirlLayout adWhirlLayout,
-                                             Ration ration) {
+    public Extra getExtra() {
+        return extra;
+    }
+
+    public AdUnitLayout getLocadzLayout() {
+        return layoutReference.get();
+    }
+
+    protected boolean isVisible() {
+        return layoutReference.get() != null;
+    }
+
+    protected void rollover() {
+        AdUnitLayout locadzLayout = layoutReference.get();
+        if (locadzLayout != null) {
+            locadzLayout.submitReloadAdRequest();
+        }
+    }
+
+    private static AdWhirlAdapter getAdapter(AdUnitLayout adWhirlLayout,
+                                             Ration ration,
+                                             Extra extra) {
         try {
-            switch (ration.type) {
+            switch (ration.getNetworkId()) {
                 case AdWhirlUtil.NETWORK_TYPE_ADMOB:
                     if (Class.forName("com.google.ads.AdView") != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.GoogleAdMobAdsAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
@@ -51,7 +76,7 @@ public abstract class AdWhirlAdapter {
                     if (Class.forName("com.inmobi.androidsdk.IMAdView")
                         != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.InMobiAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
@@ -60,7 +85,7 @@ public abstract class AdWhirlAdapter {
                     if (Class.forName("com.qwapi.adclient.android.view.QWAdView")
                         != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.QuattroAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
@@ -68,7 +93,7 @@ public abstract class AdWhirlAdapter {
                 case AdWhirlUtil.NETWORK_TYPE_MILLENNIAL:
                     if (Class.forName("com.millennialmedia.android.MMAdView") != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.MillennialAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
@@ -76,7 +101,7 @@ public abstract class AdWhirlAdapter {
                 case AdWhirlUtil.NETWORK_TYPE_ADSENSE:
                     if (Class.forName("com.google.ads.GoogleAdView") != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.AdSenseAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
@@ -84,31 +109,31 @@ public abstract class AdWhirlAdapter {
                 case AdWhirlUtil.NETWORK_TYPE_ZESTADZ:
                     if (Class.forName("com.zestadz.android.ZestADZAdView") != null) {
                         return getNetworkAdapter("com.adwhirl.adapters.ZestAdzAdapter",
-                            adWhirlLayout, ration);
+                            adWhirlLayout, ration, extra);
                     } else {
                         return unknownAdNetwork(adWhirlLayout, ration);
                     }
 
                 case AdWhirlUtil.NETWORK_TYPE_MDOTM:
                     return getNetworkAdapter("com.adwhirl.adapters.MdotMAdapter",
-                        adWhirlLayout, ration);
+                        adWhirlLayout, ration, extra);
 
                 case AdWhirlUtil.NETWORK_TYPE_ONERIOT:
                     return getNetworkAdapter("com.adwhirl.adapters.OneRiotAdapter",
-                        adWhirlLayout, ration);
+                        adWhirlLayout, ration, extra);
 
                 case AdWhirlUtil.NETWORK_TYPE_NEXAGE:
                     return getNetworkAdapter("com.adwhirl.adapters.NexageAdapter",
-                        adWhirlLayout, ration);
+                        adWhirlLayout, ration, extra);
 
-                case AdWhirlUtil.NETWORK_TYPE_CUSTOM:
-                    return new CustomAdapter(adWhirlLayout, ration);
-
-                case AdWhirlUtil.NETWORK_TYPE_GENERIC:
-                    return new GenericAdapter(adWhirlLayout, ration);
-
-                case AdWhirlUtil.NETWORK_TYPE_EVENT:
-                    return new EventAdapter(adWhirlLayout, ration);
+//                case AdWhirlUtil.NETWORK_TYPE_CUSTOM:
+//                    return new CustomAdapter(adWhirlLayout, ration, extra);
+//
+//                case AdWhirlUtil.NETWORK_TYPE_GENERIC:
+//                    return new GenericAdapter(adWhirlLayout, ration, extra);
+//
+//                case AdWhirlUtil.NETWORK_TYPE_EVENT:
+//                    return new EventAdapter(adWhirlLayout, ration, extra);
 
                 default:
                     return unknownAdNetwork(adWhirlLayout, ration);
@@ -122,7 +147,9 @@ public abstract class AdWhirlAdapter {
     }
 
     private static AdWhirlAdapter getNetworkAdapter(String networkAdapter,
-                                                    AdWhirlLayout adWhirlLayout, Ration ration) {
+                                                    AdUnitLayout adWhirlLayout,
+                                                    Ration ration,
+                                                    Extra extra) {
         AdWhirlAdapter adWhirlAdapter = null;
 
         try {
@@ -130,16 +157,18 @@ public abstract class AdWhirlAdapter {
             Class<? extends AdWhirlAdapter> adapterClass =
                 (Class<? extends AdWhirlAdapter>) Class.forName(networkAdapter);
 
-            Class<?>[] parameterTypes = new Class[2];
-            parameterTypes[0] = AdWhirlLayout.class;
+            Class<?>[] parameterTypes = new Class[3];
+            parameterTypes[0] = AdUnitLayout.class;
             parameterTypes[1] = Ration.class;
+            parameterTypes[2] = Extra.class;
 
             Constructor<? extends AdWhirlAdapter> constructor =
                 adapterClass.getConstructor(parameterTypes);
 
-            Object[] args = new Object[2];
+            Object[] args = new Object[3];
             args[0] = adWhirlLayout;
             args[1] = ration;
+            args[2] = extra;
 
             adWhirlAdapter = constructor.newInstance(args);
         } catch (ClassNotFoundException e) {
@@ -153,17 +182,17 @@ public abstract class AdWhirlAdapter {
         return adWhirlAdapter;
     }
 
-    private static AdWhirlAdapter unknownAdNetwork(AdWhirlLayout adWhirlLayout,
+    private static AdWhirlAdapter unknownAdNetwork(AdUnitLayout adWhirlLayout,
                                                    Ration ration) {
-        Log.w(AdWhirlUtil.ADWHIRL, "Unsupported ration type: " + ration.type);
+        Log.w(LocadzUtils.LOGID, "Unsupported ration type: " + ration.getNetworkId());
         return null;
     }
 
-    public static AdWhirlAdapter handle(AdWhirlLayout adWhirlLayout, Ration ration) throws
+    public static AdWhirlAdapter handle(AdUnitLayout adWhirlLayout, Ration ration, Extra extra) throws
         Throwable {
-        AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration);
+        AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration, extra);
         if (adapter != null) {
-            Log.d(AdWhirlUtil.ADWHIRL, "Valid adapter, calling handle()");
+            Log.d(LocadzUtils.LOGID, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
             adapter.handle();
         } else {
             throw new Exception("Invalid adapter");
@@ -175,7 +204,7 @@ public abstract class AdWhirlAdapter {
 
     // Added to tell adapter that it's view will be destroyed.
     public void willDestroy() {
-        Log.d(AdWhirlUtil.ADWHIRL, "Generic adapter will get destroyed");
+        Log.d(LocadzUtils.LOGID, "Generic adapter will get destroyed");
     }
 
     protected static String googleAdSenseCompanyName;
@@ -198,4 +227,7 @@ public abstract class AdWhirlAdapter {
     public static void setGoogleAdSenseExpandDirection(String direction) {
         googleAdSenseExpandDirection = direction;
     }
+
+
+
 }

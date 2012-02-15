@@ -2,18 +2,17 @@ package com.adwhirl.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdWhirlLayout;
-import com.adwhirl.AdWhirlLayout.ViewAdRunnable;
 import com.adwhirl.AdWhirlTargeting;
 import com.adwhirl.AdWhirlTargeting.Gender;
-import com.adwhirl.obj.Extra;
-import com.adwhirl.obj.Ration;
-import com.adwhirl.util.AdWhirlUtil;
 import com.inmobi.androidsdk.IMAdListener;
 import com.inmobi.androidsdk.IMAdRequest;
 import com.inmobi.androidsdk.IMAdRequest.ErrorCode;
 import com.inmobi.androidsdk.IMAdRequest.GenderType;
 import com.inmobi.androidsdk.IMAdView;
+import com.locadz.AdUnitLayout;
+import com.locadz.LocadzUtils;
+import com.locadz.model.Extra;
+import com.locadz.model.Ration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,32 +24,31 @@ import java.util.Map;
  */
 
 public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener {
-    private Extra extra = null;
+
     public int adUnit = IMAdView.INMOBI_AD_UNIT_320X50; //default size 15
 
-    public InMobiAdapter(AdWhirlLayout adWhirlLayout, Ration ration) {
-        super(adWhirlLayout, ration);
-        extra = adWhirlLayout.extra;
+    public InMobiAdapter(AdUnitLayout locadzLayout, Ration ration, Extra extra) {
+        super(locadzLayout, ration, extra);
     }
 
     @Override
     public void handle() {
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        Activity activity = adWhirlLayout.activityReference.get();
+        Activity activity = locadzLayout.getActivity();
         if (activity == null) {
             return;
         }
 
-        IMAdView adView = new IMAdView(activity, adUnit, ration.key);
+        IMAdView adView = new IMAdView(activity, adUnit, ration.getKey());
         adView.setIMAdListener(this);
         IMAdRequest imAdRequest = new IMAdRequest();
         imAdRequest.setAge(AdWhirlTargeting.getAge());
         imAdRequest.setGender(this.getGender());
-        imAdRequest.setLocationInquiryAllowed(this.isLocationInquiryAllowed());
+        imAdRequest.setLocationInquiryAllowed(extra.isLocationOn());
         imAdRequest.setTestMode(AdWhirlTargeting.getTestMode());
         imAdRequest.setKeywords(AdWhirlTargeting.getKeywords());
         imAdRequest.setPostalCode(AdWhirlTargeting.getPostalCode());
@@ -67,26 +65,20 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
 
     @Override
     public void onAdRequestCompleted(IMAdView adView) {
-        Log.d(AdWhirlUtil.ADWHIRL, "InMobi success");
+        Log.d(LocadzUtils.LOGID, "InMobi success");
 
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
+        AdUnitLayout locadzLayout = getLocadzLayout();
+        if (locadzLayout == null) {
             return;
         }
 
-        adWhirlLayout.adWhirlManager.resetRollover();
-        adWhirlLayout.handler.post(new ViewAdRunnable(adWhirlLayout, adView));
-        adWhirlLayout.rotateThreadedDelayed();
+        locadzLayout.submitPushSubViewRequest(adView);
     }
 
     @Override
     public void onAdRequestFailed(IMAdView adView, ErrorCode errorCode) {
-        Log.d(AdWhirlUtil.ADWHIRL, "InMobi failure (" + errorCode + ")");
-        AdWhirlLayout adWhirlLayout = adWhirlLayoutReference.get();
-        if (adWhirlLayout == null) {
-            return;
-        }
-        adWhirlLayout.rollover();
+        Log.d(LocadzUtils.LOGID, "InMobi failure (" + errorCode + ")");
+        rollover();
     }
 
     @Override
@@ -108,11 +100,4 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
         return GenderType.NONE;
     }
 
-    public boolean isLocationInquiryAllowed() {
-        if (extra.locationOn == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }
