@@ -17,6 +17,7 @@
 package com.locadz.model;
 
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.annotate.JsonPropertyOrder;
 
@@ -27,6 +28,7 @@ import java.util.List;
  *
  */
 @JsonPropertyOrder({ "extra", "rations" })
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class AdUnitAllocation implements Serializable {
 
     private static final long serialVersionUID = 1;

@@ -17,6 +17,7 @@
 package com.locadz.model;
 
 import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.io.Serializable;
@@ -24,6 +25,7 @@ import java.io.Serializable;
 /**
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public final class Extra  implements Serializable {
 
     private static final long serialVersionUID = 1;
