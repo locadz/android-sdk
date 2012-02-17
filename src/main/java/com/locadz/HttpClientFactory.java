@@ -16,9 +16,8 @@
 
 package com.locadz;
 
-import android.net.http.AndroidHttpClient;
-
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.lang.ref.SoftReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -51,7 +50,7 @@ public class HttpClientFactory {
 
                 httpClient = instance.get();
                 if (httpClient == null) {
-                    httpClient = AndroidHttpClient.newInstance("Locadz/1.0");
+                    httpClient = new DefaultHttpClient();
                     instance = new SoftReference<HttpClient>(httpClient);
                 }
                 readLock.lock();

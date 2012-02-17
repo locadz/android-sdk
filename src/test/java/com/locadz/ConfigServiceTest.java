@@ -22,7 +22,7 @@ public class ConfigServiceTest  {
 
     @Test
     public void testLoadConfigFromRemote() {
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         
         String expected = "TEST_DATA";
         Robolectric.addPendingHttpResponse(200, expected);
@@ -35,7 +35,7 @@ public class ConfigServiceTest  {
 
     @Test
     public void testLoadConfigFromRemoteButFailed() {
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
 
         Robolectric.addPendingHttpResponse(500, "");
 
@@ -46,7 +46,7 @@ public class ConfigServiceTest  {
 
     @Test
     public void testLoadFromEmptySharedPreferences() {
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         String res = service.loadFromSharedPreferences(TestDataUtils.getAdUnitContext());
 
         Assert.assertEquals(null, res);
@@ -54,7 +54,7 @@ public class ConfigServiceTest  {
 
     @Test
     public void testWriteAndLoadFromSharedPreferences() {
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         
         String expected = "TEST_DATA";
 
@@ -78,7 +78,7 @@ public class ConfigServiceTest  {
         editor.putLong("timestamp", 0);
         editor.commit();
 
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         Assert.assertEquals(null, service.loadFromSharedPreferences(adUnitContext));
     }
 
@@ -97,7 +97,7 @@ public class ConfigServiceTest  {
         editor.putLong("timestamp", 0);
         editor.commit();
 
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         
         String expected = "NEW CONFIG";
 
@@ -109,7 +109,7 @@ public class ConfigServiceTest  {
     public void testGetAdUnitAllocation() {
         Robolectric.addPendingHttpResponse(HttpStatus.SC_OK, TestDataUtils.getAdUnitAllocationAsString());
         
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         AdUnitAllocation actual = service.getAdUnitAllocation(
             TestDataUtils.getAdUnitContext());
 
@@ -135,10 +135,10 @@ public class ConfigServiceTest  {
         );
 
         // send a ad request to config service.
-        Intent intent = ConfigService.createIntent(
+        Intent intent = AdUnitAllocationService.createIntent(
             Robolectric.getShadowApplication().getApplicationContext(),
             adUnitContext);
-        ConfigService service = new ConfigService();
+        AdUnitAllocationService service = new AdUnitAllocationService();
         service.onHandleIntent(intent);
 
         Assert.assertNotNull(response[0]);

@@ -39,15 +39,15 @@ import java.util.List;
 import java.util.Random;
 
 /** Service that retrieve the ad unit allocations from external source and cache locally in SharedPreference. */
-public final class ConfigService extends IntentService {
+public final class AdUnitAllocationService extends IntentService {
 
     private static final int CACHE_EXPIRATION_PERIOD = 30 * 60 * 1000; // 30 minutes.
 
     private final static String PREFS_STRING_TIMESTAMP = "timestamp";
     private final static String PREFS_STRING_CONFIG = "config";
 
-    public ConfigService() {
-        super(ConfigService.class.getCanonicalName());
+    public AdUnitAllocationService() {
+        super(AdUnitAllocationService.class.getCanonicalName());
     }
 
     @Override
@@ -115,7 +115,7 @@ public final class ConfigService extends IntentService {
                 return SerializationUtils.fromJson(jsonString, AdUnitAllocation.class);
             }
         } catch (IOException e) {
-            Log.d(LocadzUtils.LOGID, "Failed to de-serialize json config.", e);
+            Log.d(LocadzUtils.LOG_TAG, "Failed to de-serialize json config.", e);
         }
         return null;
     }
@@ -162,7 +162,7 @@ public final class ConfigService extends IntentService {
      */
     String loadFromRemote(AdUnitContext adUnitContext) {
 
-        Log.d(LocadzUtils.LOGID, String.format("Fetching config with %s", adUnitContext));
+        Log.d(LocadzUtils.LOG_TAG, String.format("Fetching config with %s", adUnitContext));
 
         HttpClient httpClient = HttpClientFactory.getInstance();
         URI uri = LocadzUtils.getInfoUri(adUnitContext);
@@ -175,7 +175,7 @@ public final class ConfigService extends IntentService {
 
             // if response is 1xx, 2xx or 3xx, we would return the response body
             if (httpResponse.getStatusLine().getStatusCode() < HttpStatus.SC_BAD_REQUEST) {
-                Log.d(LocadzUtils.LOGID, httpResponse.getStatusLine().toString());
+                Log.d(LocadzUtils.LOG_TAG, httpResponse.getStatusLine().toString());
 
                 HttpEntity entity = httpResponse.getEntity();
                 if (entity != null) {
@@ -184,9 +184,9 @@ public final class ConfigService extends IntentService {
                 }
             }
         } catch (ClientProtocolException e) {
-            Log.e(LocadzUtils.LOGID, "Caught ClientProtocolException in loadFromRemote()", e);
+            Log.e(LocadzUtils.LOG_TAG, "Caught ClientProtocolException in loadFromRemote()", e);
         } catch (IOException e) {
-            Log.e(LocadzUtils.LOGID, "Caught IOException in loadFromRemote()", e);
+            Log.e(LocadzUtils.LOG_TAG, "Caught IOException in loadFromRemote()", e);
         }
         return ret;
     }
@@ -199,7 +199,7 @@ public final class ConfigService extends IntentService {
      * @return an intent that will trigger this service.
      */
     public static Intent createIntent(Context context, AdUnitContext adUnitContext) {
-        Intent ret = new Intent(context, ConfigService.class);
+        Intent ret = new Intent(context, AdUnitAllocationService.class);
         ret.putExtra(IntentConstants.EXTRA_ADUNIT_CONTEXT, adUnitContext);
         return ret;
     }

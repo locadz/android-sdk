@@ -16,11 +16,17 @@
 
 package com.locadz;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -36,6 +42,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static com.locadz.LocadzUtils.LOG_TAG;
+
 /**
  *  The base canvas for the 3rd party AD View.<p/>
  *
@@ -43,9 +51,9 @@ import java.util.concurrent.TimeUnit;
  * <ol>
  *  <li>When layout is added to an Activity. The AdUnitLayout would register a {@link BroadcastReceiver} 
  *      to receive SHOW_AD response.</li>
- *  <li>Periodically, the AdUnitLayout would send a {@link Intent} to {@link ConfigService} to fetch the
+ *  <li>Periodically, the AdUnitLayout would send a {@link Intent} to {@link AdUnitAllocationService} to fetch the
  *      next AD to show.</li>
- *  <li>{@link ConfigService} will reply the request in a SHOW_AD Intent. When the {@link AdUnitLayout}
+ *  <li>{@link AdUnitAllocationService} will reply the request in a SHOW_AD Intent. When the {@link AdUnitLayout}
  *      receive this intent, it will create an {@link AdWhirlAdapter} for that intent</li>
  *  <li>{@link AdWhirlAdapter} will fetch and push the AdView to the {@link AdUnitLayout}.</li>
  *  <li>When next SHOW_AD response arrives, the {@link AdUnitLayout} will replace the existing adapter 
@@ -56,12 +64,12 @@ import java.util.concurrent.TimeUnit;
  *    <li>If the {@link AdWhirlAdapter}, fails to fetch new ADs. The {@link AdWhirlAdapter} is responsible to
  *    call {@link #submitReloadAdRequest()} to trigger loading new adapter immediately.</li>
  *    <li>If a {@link AdWhirlAdapter} derived classes fails to do so, the previous adapter will still occupy
- *      the space until next SHOW_AD request and response comming from {@link ConfigService}</li>
+ *      the space until next SHOW_AD request and response comming from {@link AdUnitAllocationService}</li>
  * </ul>
  *
  *  <ul>
- *      <li>When the parent Activity is not visible, this layout should stop sending intents to {@link ConfigService}</li>
- *      <li>When the parent Activity is visible again, this layout should start to send intents to {@link ConfigService}
+ *      <li>When the parent Activity is not visible, this layout should stop sending intents to {@link AdUnitAllocationService}</li>
+ *      <li>When the parent Activity is visible again, this layout should start to send intents to {@link AdUnitAllocationService}
  *          using the previous used cycle time.</li>
  *  </ul>
  *
@@ -71,6 +79,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class AdUnitLayout extends RelativeLayout {
 
+    public static final int GET_LOCATION_TIMEOUT = 30000;
     /** the adUnitId of this layout. */
     private String adUnitId;
 
@@ -149,7 +158,31 @@ public class AdUnitLayout extends RelativeLayout {
         IntentFilter intentFilter = new IntentFilter(IntentConstants.ACTION_SHOW_AD);
         this.getContext().registerReceiver(adIntentReceiver, intentFilter);
 
-        submitReloadAdRequest();
+
+        int accessLocationPermission = context.checkCallingOrSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION);
+        if (accessLocationPermission == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            Handler handler = new Handler() {
+                public void handleMessage(Message m) {
+                    Log.d(LOG_TAG, "Handler returned with message: " + m.toString());
+                    if (m.what == LocationHelper.MESSAGE_CODE_LOCATION_FOUND) {
+                        Location location = (Location) m.obj;
+                        adUnitContext = new AdUnitContext.Builder()
+                            .copy(adUnitContext)
+                            .withLocation(location)
+                            .build();
+                    } else if (m.what == LocationHelper.MESSAGE_CODE_LOCATION_NULL) {
+
+                    } else if (m.what == LocationHelper.MESSAGE_CODE_PROVIDER_NOT_PRESENT) {
+                    }
+                    submitReloadAdRequest();
+                }
+            };
+            LocationHelper helper = new LocationHelper(locationManager, handler, LOG_TAG);
+            helper.getCurrentLocation(GET_LOCATION_TIMEOUT);
+        } else {
+            submitReloadAdRequest();
+        }
     }
 
 
@@ -213,7 +246,7 @@ public class AdUnitLayout extends RelativeLayout {
         layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
         this.addView(subView, layoutParams);
 
-        Log.d(LocadzUtils.LOGID, "Added subview");
+        Log.d(LocadzUtils.LOG_TAG, "Added subview");
         countImpression();
     }
 
@@ -224,7 +257,7 @@ public class AdUnitLayout extends RelativeLayout {
      * @param subView   the adview to push.
      */
     public void submitPushSubViewRequest(ViewGroup subView) {
-        Log.d(LocadzUtils.LOGID, String.format("Scheduled pushSubView(%s)", subView));
+        Log.d(LocadzUtils.LOG_TAG, String.format("Scheduled pushSubView(%s)", subView));
         getHandler().post(new ViewAdRunnable(this, subView));
     }
 
@@ -267,7 +300,7 @@ public class AdUnitLayout extends RelativeLayout {
                     scheduleReload(extra.getCycleTime());
                 }
             } catch (Throwable t) {
-                Log.w(LocadzUtils.LOGID, "Caught an exception in adapter:", t);
+                Log.w(LocadzUtils.LOG_TAG, "Caught an exception in adapter:", t);
                 submitReloadAdRequest();
                 return;
             }
@@ -280,7 +313,7 @@ public class AdUnitLayout extends RelativeLayout {
      * TODO: find a better name for this function.
      */
     public void submitReloadAdRequest() {
-        Intent intent = ConfigService.createIntent(this.getContext(), adUnitContext);
+        Intent intent = AdUnitAllocationService.createIntent(this.getContext(), adUnitContext);
         getActivity().startService(intent);
     }
 
@@ -397,7 +430,7 @@ public class AdUnitLayout extends RelativeLayout {
         public void run() {
             Context context = contextWeakReference.get();
             if (context != null) {
-                Intent intent = ConfigService.createIntent(context, adUnitContext);
+                Intent intent = AdUnitAllocationService.createIntent(context, adUnitContext);
                 context.startService(intent);
             }
         }

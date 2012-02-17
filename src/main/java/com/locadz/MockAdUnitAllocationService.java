@@ -31,10 +31,10 @@ import java.util.List;
 import java.util.Random;
 
 /** Mock ConfigService for testing use. */
-public final class MockConfigService extends IntentService {
+public final class MockAdUnitAllocationService extends IntentService {
 
-    public MockConfigService() {
-        super(MockConfigService.class.getCanonicalName());
+    public MockAdUnitAllocationService() {
+        super(MockAdUnitAllocationService.class.getCanonicalName());
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class MockConfigService extends IntentService {
     }
 
     public static Intent createIntent(Context context, AdUnitContext adUnitContext) {
-        Intent ret = new Intent(context, MockConfigService.class);
+        Intent ret = new Intent(context, MockAdUnitAllocationService.class);
         ret.putExtra(IntentConstants.EXTRA_ADUNIT_CONTEXT, adUnitContext);
         return ret;
     }

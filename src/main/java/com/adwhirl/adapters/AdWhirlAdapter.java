@@ -184,7 +184,7 @@ public abstract class AdWhirlAdapter {
 
     private static AdWhirlAdapter unknownAdNetwork(AdUnitLayout adWhirlLayout,
                                                    Ration ration) {
-        Log.w(LocadzUtils.LOGID, "Unsupported ration type: " + ration.getNetworkId());
+        Log.w(LocadzUtils.LOG_TAG, "Unsupported ration type: " + ration.getNetworkId());
         return null;
     }
 
@@ -192,7 +192,7 @@ public abstract class AdWhirlAdapter {
         Throwable {
         AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration, extra);
         if (adapter != null) {
-            Log.d(LocadzUtils.LOGID, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
+            Log.d(LocadzUtils.LOG_TAG, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
             adapter.handle();
         } else {
             throw new Exception("Invalid adapter");
@@ -204,7 +204,7 @@ public abstract class AdWhirlAdapter {
 
     // Added to tell adapter that it's view will be destroyed.
     public void willDestroy() {
-        Log.d(LocadzUtils.LOGID, "Generic adapter will get destroyed");
+        Log.d(LocadzUtils.LOG_TAG, "Generic adapter will get destroyed");
     }
 
     protected static String googleAdSenseCompanyName;

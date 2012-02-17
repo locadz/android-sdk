@@ -25,7 +25,7 @@ import android.os.Parcelable;
  */
 public final class AdUnitContext implements Parcelable {
 
-    private final String appVerion;
+    private final String appVersion;
 
     private final String adUnitId;
 
@@ -33,7 +33,7 @@ public final class AdUnitContext implements Parcelable {
 
     public AdUnitContext(String adUnitId, String appVerion, Location location) {
         this.adUnitId = adUnitId;
-        this.appVerion = appVerion;
+        this.appVersion = appVerion;
         this.location = location;
     }
 
@@ -43,13 +43,13 @@ public final class AdUnitContext implements Parcelable {
 
     public AdUnitContext(Parcel in) {
         this.adUnitId = in.readString();
-        this.appVerion = in.readString();
+        this.appVersion = in.readString();
         this.location = (Location) in.readParcelable(Location.class.getClassLoader());
 
     }
 
-    public String getAppVerion() {
-        return appVerion;
+    public String getAppVersion() {
+        return appVersion;
     }
 
     public String getAdUnitId() {
@@ -68,7 +68,7 @@ public final class AdUnitContext implements Parcelable {
         AdUnitContext that = (AdUnitContext) o;
 
         if (adUnitId != null ? !adUnitId.equals(that.adUnitId) : that.adUnitId != null) return false;
-        if (appVerion != null ? !appVerion.equals(that.appVerion) : that.appVerion != null) return false;
+        if (appVersion != null ? !appVersion.equals(that.appVersion) : that.appVersion != null) return false;
         if (location != null ? !location.equals(that.location) : that.location != null) return false;
 
         return true;
@@ -76,7 +76,7 @@ public final class AdUnitContext implements Parcelable {
 
     @Override
     public int hashCode() {
-        int result = appVerion != null ? appVerion.hashCode() : 0;
+        int result = appVersion != null ? appVersion.hashCode() : 0;
         result = 31 * result + (adUnitId != null ? adUnitId.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
         return result;
@@ -86,7 +86,7 @@ public final class AdUnitContext implements Parcelable {
     public String toString() {
         return "AdUnitContext{" +
             "adUnitId='" + adUnitId + '\'' +
-            ", appVerion='" + appVerion + '\'' +
+            ", appVerion='" + appVersion + '\'' +
             ", location='" + location + '\'' +
             '}';
     }
@@ -99,7 +99,7 @@ public final class AdUnitContext implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flag) {
         parcel.writeString(adUnitId);
-        parcel.writeString(appVerion);
+        parcel.writeString(appVersion);
         parcel.writeParcelable(location, flag);
     }
 
@@ -113,4 +113,47 @@ public final class AdUnitContext implements Parcelable {
         }
     };
 
+
+    public static class Builder {
+
+        private String appVersion;
+
+        private String adUnitId;
+
+        private Location location;
+
+        public Builder() {
+            
+        }
+        
+        public Builder withAdUnitId(String adUnitId) {
+            this.adUnitId = adUnitId;
+            return this;
+        }
+
+        public Builder withAppVersion(String appVersion) {
+            this.appVersion = appVersion;
+            return this;
+        }
+
+        public Builder withLocation(Location location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder copy(AdUnitContext adUnitContext) {
+            this.adUnitId = adUnitContext.adUnitId;
+            if (adUnitContext.appVersion != null) {
+                this.appVersion = adUnitContext.appVersion;
+            }
+            if (adUnitContext.location != null) {
+                this.location = adUnitContext.location;
+            }
+            return this;
+        }
+
+        public AdUnitContext build() {
+            return new AdUnitContext(adUnitId, appVersion, location);
+        }
+    }
 }

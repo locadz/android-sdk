@@ -91,7 +91,7 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
     }
 
     public void MMAdReturned(MMAdView adView) {
-        Log.d(LocadzUtils.LOGID, "Millennial success");
+        Log.d(LocadzUtils.LOG_TAG, "Millennial success");
         adView.setListener(null);
 
         AdUnitLayout locadzLayout = getLocadzLayout();
@@ -102,7 +102,7 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
     }
 
     public void MMAdFailed(MMAdView adView) {
-        Log.d(LocadzUtils.LOGID, "Millennial failure");
+        Log.d(LocadzUtils.LOG_TAG, "Millennial failure");
         adView.setListener(null);
         AdUnitLayout locadzLayout = getLocadzLayout();
         if (locadzLayout == null) {
@@ -112,15 +112,15 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
     }
 
     public void MMAdClickedToNewBrowser(MMAdView adview) {
-        Log.d(LocadzUtils.LOGID, "Millennial Ad clicked, new browser launched");
+        Log.d(LocadzUtils.LOG_TAG, "Millennial Ad clicked, new browser launched");
     }
 
     public void MMAdClickedToOverlay(MMAdView adview) {
-        Log.d(LocadzUtils.LOGID, "Millennial Ad Clicked to overlay");
+        Log.d(LocadzUtils.LOG_TAG, "Millennial Ad Clicked to overlay");
     }
 
     public void MMAdOverlayLaunched(MMAdView adview) {
-        Log.d(LocadzUtils.LOGID, "Millennial Ad Overlay Launched");
+        Log.d(LocadzUtils.LOG_TAG, "Millennial Ad Overlay Launched");
     }
 
     public void MMAdRequestIsCaching(MMAdView adView) {

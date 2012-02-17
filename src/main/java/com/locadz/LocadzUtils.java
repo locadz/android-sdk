@@ -31,7 +31,7 @@ import java.net.URI;
  */
 public class LocadzUtils {
 
-    public static final String LOGID = "Locadz SDK";
+    public static final String LOG_TAG = "Locadz SDK";
 
     private static final String INFO_URI = "http://api.locadz.com/rest/v1?appid=%s&appver=%s&client=2&location=%s";
 
@@ -44,7 +44,7 @@ public class LocadzUtils {
             locationString = String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude());
         }
 
-        return URI.create(String.format(INFO_URI, context.getAdUnitId(), context.getAppVerion(), locationString));
+        return URI.create(String.format(INFO_URI, context.getAdUnitId(), context.getAppVersion(), locationString));
 
     }
 

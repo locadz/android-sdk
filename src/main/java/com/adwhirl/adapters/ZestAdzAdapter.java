@@ -66,7 +66,7 @@ public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
 
     /** *************************************************************** */
     public void AdReturned(ZestADZAdView adView) {
-        Log.d(LocadzUtils.LOGID, "ZestADZ success");
+        Log.d(LocadzUtils.LOG_TAG, "ZestADZ success");
 
         AdUnitLayout locadzLayout = getLocadzLayout();
         if (locadzLayout == null) {
@@ -77,7 +77,7 @@ public class ZestAdzAdapter extends AdWhirlAdapter implements ZestADZListener {
     }
 
     public void AdFailed(ZestADZAdView adView) {
-        Log.d(LocadzUtils.LOGID, "ZestADZ failure");
+        Log.d(LocadzUtils.LOG_TAG, "ZestADZ failure");
 
         adView.setListener(null);
 

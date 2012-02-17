@@ -65,7 +65,7 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
 
     @Override
     public void onAdRequestCompleted(IMAdView adView) {
-        Log.d(LocadzUtils.LOGID, "InMobi success");
+        Log.d(LocadzUtils.LOG_TAG, "InMobi success");
 
         AdUnitLayout locadzLayout = getLocadzLayout();
         if (locadzLayout == null) {
@@ -77,7 +77,7 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
 
     @Override
     public void onAdRequestFailed(IMAdView adView, ErrorCode errorCode) {
-        Log.d(LocadzUtils.LOGID, "InMobi failure (" + errorCode + ")");
+        Log.d(LocadzUtils.LOG_TAG, "InMobi failure (" + errorCode + ")");
         rollover();
     }
 

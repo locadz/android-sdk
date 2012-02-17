@@ -41,14 +41,14 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
 
         if (clientId == null || !clientId.startsWith("ca-mb-app-pub-")) {
             // Invalid publisher ID
-            Log.w(LocadzUtils.LOGID, "Invalid AdSense client ID");
+            Log.w(LocadzUtils.LOG_TAG, "Invalid AdSense client ID");
             rollover();
             return;
         }
         if (TextUtils.isEmpty(googleAdSenseCompanyName)
             || TextUtils.isEmpty(googleAdSenseAppName)) {
             // Missing required parameters
-            Log.w(LocadzUtils.LOGID,
+            Log.w(LocadzUtils.LOG_TAG,
                 "AdSense company name and app name are required parameters");
             rollover();
             return;
@@ -128,7 +128,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
     }
 
     public void onFinishFetchAd() {
-        Log.d(LocadzUtils.LOGID, "AdSense success");
+        Log.d(LocadzUtils.LOG_TAG, "AdSense success");
         adView.setAdViewListener(null);
 
         AdUnitLayout locadzLayout = getLocadzLayout();
@@ -145,7 +145,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
     }
 
     public void onAdFetchFailure() {
-        Log.d(LocadzUtils.LOGID, "AdSense failure");
+        Log.d(LocadzUtils.LOG_TAG, "AdSense failure");
         adView.setAdViewListener(null);
 
         AdUnitLayout locadzLayout = getLocadzLayout();

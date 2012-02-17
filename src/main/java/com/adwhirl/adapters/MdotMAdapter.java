@@ -56,7 +56,7 @@ public class MdotMAdapter extends AdWhirlAdapter implements MdotMActionListener 
     }
 
     public void adRequestCompletedSuccessfully(MdotMView adView) {
-        Log.d(LocadzUtils.LOGID, "MdotM success");
+        Log.d(LocadzUtils.LOG_TAG, "MdotM success");
 
         AdUnitLayout locadzLayout = getLocadzLayout();
         if (locadzLayout == null) {
@@ -69,7 +69,7 @@ public class MdotMAdapter extends AdWhirlAdapter implements MdotMActionListener 
     }
 
     public void adRequestFailed(MdotMView adView) {
-        Log.d(LocadzUtils.LOGID, "MdotM failure");
+        Log.d(LocadzUtils.LOG_TAG, "MdotM failure");
         adView.setListener(null);
 
         AdUnitLayout locadzLayout = getLocadzLayout();

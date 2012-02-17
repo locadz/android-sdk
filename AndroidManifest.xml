@@ -38,8 +38,8 @@
              Activity-specific key will override the App-wide key. -->
         <!-- If Activity-specific key is omitted, the App-wide key will be used. -->
         <meta-data android:value="643eb700781e4f47b017ea27d1aba3be" android:name="ADUNIT" />
-        <service android:enabled="true" android:name="com.locadz.ConfigService"/>
-        <service android:enabled="true" android:name="com.locadz.MockConfigService"/>
+        <service android:enabled="true" android:name="com.locadz.AdUnitAllocationService"/>
+        <service android:enabled="true" android:name="com.locadz.MockAdUnitAllocationService"/>
     </application>
     <uses-sdk android:minSdkVersion="8" />
     <uses-permission android:name="android.permission.INTERNET" />

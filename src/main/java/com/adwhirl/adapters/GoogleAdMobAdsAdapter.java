@@ -87,7 +87,7 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
     }
 
     protected void log(String message) {
-        Log.d(LocadzUtils.LOGID, "GoogleAdapter " + message);
+        Log.d(LocadzUtils.LOG_TAG, "GoogleAdapter " + message);
     }
 
     protected AdRequest requestForAdWhirlLayout(AdUnitLayout layout) {
