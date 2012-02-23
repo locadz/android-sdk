@@ -95,18 +95,13 @@
       <artifactId>GoogleAdMobAdsSdk</artifactId>
       <version>4.3.1</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/GoogleAdMobAdsSdk-4.3.1.jar</systemPath>
     </dependency>
-
 
     <dependency>
       <groupId>com.google</groupId>
       <artifactId>adsense</artifactId>
       <version>1.0.0</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/GoogleAdView.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -114,8 +109,6 @@
       <artifactId>androidsdk</artifactId>
       <version>1.0.0</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/InMobiAndroidSDK.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -123,8 +116,6 @@
       <artifactId>android</artifactId>
       <version>1.0.0</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/mdotm-sdk-android.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -132,8 +123,6 @@
       <artifactId>android</artifactId>
       <version>4.5.1</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/MMAdView.jar</systemPath>
     </dependency>
 
     <dependency>
@@ -141,22 +130,18 @@
       <artifactId>android</artifactId>
       <version>1.2.0</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/zestadz_sdk_androidv1.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.vpon</groupId>
       <artifactId>android</artifactId>
       <version>3.0.3</version>
       <optional>true</optional>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/AdOn-3.0.3.jar</systemPath>
     </dependency>
     <dependency>
-         <groupId>com.pivotallabs</groupId>
-         <artifactId>robolectric</artifactId>
-         <version>1.0</version>
-         <scope>test</scope>
+      <groupId>com.pivotallabs</groupId>
+      <artifactId>robolectric</artifactId>
+      <version>1.0</version>
+      <scope>test</scope>
      </dependency>
     <dependency>
       <groupId>com.google.android</groupId>
@@ -175,6 +160,11 @@
     <repository>
       <id>sonatype-oss</id>
       <url>https://oss.sonatype.org/content/repositories/releases</url>
+    </repository>
+    <repository>
+      <id>bluetang-internal</id>
+      <name>bluetang-internal</name>
+      <url>http://maven.bluetangstudio.com:8081/nexus/content/groups/public</url>
     </repository>
   </repositories>
 
