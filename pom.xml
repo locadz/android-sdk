@@ -6,7 +6,6 @@
   <artifactId>android-sdk</artifactId>
   <version>1.0.0-SNAPSHOT</version>
   <name>Locadz Android SDK</name>
-  <packaging>apklib</packaging>
 
   <parent>
     <groupId>com.bluetangstudio.common</groupId>
