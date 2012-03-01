@@ -49,17 +49,17 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  *
  * Workflow:
  * <ol>
- *  <li>When layout is added to an Activity. The AdUnitLayout would register a {@link BroadcastReceiver} 
+ *  <li>When layout is added to an Activity. The AdUnitLayout would register a {@link BroadcastReceiver}
  *      to receive SHOW_AD response.</li>
  *  <li>Periodically, the AdUnitLayout would send a {@link Intent} to {@link AdUnitAllocationService} to fetch the
  *      next AD to show.</li>
  *  <li>{@link AdUnitAllocationService} will reply the request in a SHOW_AD Intent. When the {@link AdUnitLayout}
  *      receive this intent, it will create an {@link AdWhirlAdapter} for that intent</li>
  *  <li>{@link AdWhirlAdapter} will fetch and push the AdView to the {@link AdUnitLayout}.</li>
- *  <li>When next SHOW_AD response arrives, the {@link AdUnitLayout} will replace the existing adapter 
+ *  <li>When next SHOW_AD response arrives, the {@link AdUnitLayout} will replace the existing adapter
  *      with the new adapter.</li>
  * </ol>
- * 
+ *
  * <ul>
  *    <li>If the {@link AdWhirlAdapter}, fails to fetch new ADs. The {@link AdWhirlAdapter} is responsible to
  *    call {@link #submitReloadAdRequest()} to trigger loading new adapter immediately.</li>
@@ -116,21 +116,63 @@ public class AdUnitLayout extends RelativeLayout {
 
     /**
      * Constructor for XML style.
-     * @param context
-     * @param set
+     *
+     * @param context The containing context
+     * @param set The configuration from XML
      */
-    public AdUnitLayout(Context context, AttributeSet set) {
+    public AdUnitLayout(Context context, AttributeSet set)
+    {
         super(context, set);
         init((Activity) context, LocadzUtils.getAdUnitId(context));
     }
 
     /**
      * Constructor for initializing the layout programmatically.
-     * @param context
+     *
+     * @param context The containing context
+     * @param adUnitId The id used to handle {@link Context#sendBroadcast} from triggered service of this object
      */
-    public AdUnitLayout(Activity context, String adUnitId) {
+    public AdUnitLayout(Activity context, String adUnitId)
+    {
         super(context);
         init(context, adUnitId);
+    }
+
+    /**
+     * Submit a reload AD request asynchronously.
+     *
+     * TODO: find a better name for this function.
+     */
+    public void submitReloadAdRequest() {
+        Intent intent = AdUnitAllocationService.createIntent(this.getContext(), adUnitContext);
+        getActivity().startService(intent);
+    }
+
+    /**
+     *  submit a push view request to Android's handler. This will remove
+     *  old ad view and push a new one to this layout asynchronously.
+     *
+     * @param subView   the adview to push.
+     */
+    public void submitPushSubViewRequest(ViewGroup subView) {
+        Log.d(LocadzUtils.LOG_TAG, String.format("Scheduled pushSubView(%s)", subView));
+        getHandler().post(new ViewAdRunnable(this, subView));
+    }
+
+    /**
+     *
+     * @return  the context of this AdUnitLayout.
+     */
+    public AdUnitContext getAdUnitContext() {
+        return adUnitContext;
+    }
+
+    /**
+     *
+     * @return  the parent Activity or null if the activity has been recycled by the system.
+     */
+    public Activity getActivity() {
+        return activityReference.get();
     }
 
     /**
@@ -184,7 +226,6 @@ public class AdUnitLayout extends RelativeLayout {
             submitReloadAdRequest();
         }
     }
-
 
     /** {@inheritDoc} */
     @Override
@@ -250,35 +291,7 @@ public class AdUnitLayout extends RelativeLayout {
         countImpression();
     }
 
-    /**
-     *  submit a push view request to Android's handler. This will remove
-     *  old ad view and push a new one to this layout asynchronously.
-     *
-     * @param subView   the adview to push.
-     */
-    public void submitPushSubViewRequest(ViewGroup subView) {
-        Log.d(LocadzUtils.LOG_TAG, String.format("Scheduled pushSubView(%s)", subView));
-        getHandler().post(new ViewAdRunnable(this, subView));
-    }
-
-    /**
-     *
-     * @return  the context of this AdUnitLayout.
-     */
-    public AdUnitContext getAdUnitContext() {
-        return adUnitContext;
-    }
-
-    /**
-     *
-     * @return  the parent Activity or null if the activity has been recycled by the system.
-     */
-    public Activity getActivity() {
-        return activityReference.get();
-    }
-
-    private void countImpression() {
-    }
+    private void countImpression() {}
 
     /**
      *
@@ -308,30 +321,20 @@ public class AdUnitLayout extends RelativeLayout {
     }
 
     /**
-     * Submit a reload AD request asynchronously.
-     *
-     * TODO: find a better name for this function.
-     */
-    public void submitReloadAdRequest() {
-        Intent intent = AdUnitAllocationService.createIntent(this.getContext(), adUnitContext);
-        getActivity().startService(intent);
-    }
-
-    /**
      * Broadcast receiver that receives SHOW_AD intent and replace the existing adaptor with the
      * new one specified in the intent.
      */
     private static final class ShowAdIntentReceiver extends BroadcastReceiver {
 
         private final String adUnitId;
-        
+
         private final WeakReference<AdUnitLayout> locadzLayoutWeakReference;
 
         public ShowAdIntentReceiver(String adUnitId, AdUnitLayout layout) {
             this.adUnitId = adUnitId;
             locadzLayoutWeakReference = new WeakReference<AdUnitLayout>(layout);
         }
-        
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -370,9 +373,9 @@ public class AdUnitLayout extends RelativeLayout {
         private final WeakReference<AdUnitLayout> locadzLayoutWeakReference;
 
         private final Ration ration;
-        
+
         private final Extra extra;
-        
+
         public RotateAdRunnable(AdUnitLayout layout, Ration ration, Extra extra) {
             this.ration = ration;
             this.extra = extra;
@@ -435,5 +438,5 @@ public class AdUnitLayout extends RelativeLayout {
             }
         }
     }
-    
+
 }
