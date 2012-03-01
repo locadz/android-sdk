@@ -27,31 +27,49 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * This base class provides essence of environment for advertising adapter.<p>
+ *
+ * The {@link #getLocadzLayout} would give a object from {@link WeakReference},
+ * hence the sub-class should concern null value of parent layout.<p>
+ *
+ * Sub-class should implement {@link #handle} method to initialize view for particular service of advertisement.<p>
+ */
 public abstract class AdWhirlAdapter {
-
     private final WeakReference<AdUnitLayout> layoutReference;
-    protected final Ration ration;
 
+    protected final Ration ration;
     protected final Extra extra;
 
-    public AdWhirlAdapter(AdUnitLayout layout, Ration ration, Extra extra) {
+    /**
+     * This method would be called when this adapter is choosed as target network of advertisement.<p>
+     */
+    public abstract void handle();
+
+    /**
+     * Construct this adapter by essential environment and information of advertising service.<p>
+     *
+     * @param layout The object of parent layout
+     * @param ration The meta-data of advertisement service
+     * @param extra The extra parameters for advertisement service
+     */
+    public AdWhirlAdapter(AdUnitLayout layout, Ration ration, Extra extra)
+    {
         this.layoutReference = new WeakReference<AdUnitLayout>(layout);
         this.ration = ration;
         this.extra = extra;
     }
 
-    public Extra getExtra() {
-        return extra;
-    }
-
     public AdUnitLayout getLocadzLayout() {
         return layoutReference.get();
+    }
+    public Extra getExtra() {
+        return extra;
     }
 
     protected boolean isVisible() {
         return layoutReference.get() != null;
     }
-
     protected void rollover() {
         AdUnitLayout locadzLayout = layoutReference.get();
         if (locadzLayout != null) {
@@ -59,9 +77,31 @@ public abstract class AdWhirlAdapter {
         }
     }
 
-    private static AdWhirlAdapter getAdapter(AdUnitLayout adWhirlLayout,
-                                             Ration ration,
-                                             Extra extra) {
+    /**
+     * This utility method constructs a new {@link AdWhirlAdapter} by {@link Ration#getNetworkId}.<p>
+     *
+     * @param adWhirlLayout The object of parent layout
+     * @param ration The meta-data of advertisement service
+     * @param extra The extra parameters for advertisement service
+     *
+     * @see AdWhirlTargeting
+     */
+    public static AdWhirlAdapter handle(
+        AdUnitLayout adWhirlLayout, Ration ration, Extra extra
+    ) throws Throwable {
+        AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration, extra);
+        if (adapter != null) {
+            Log.d(LocadzUtils.LOG_TAG, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
+            adapter.handle();
+        } else {
+            throw new Exception("Invalid adapter");
+        }
+        return adapter;
+    }
+    private static AdWhirlAdapter getAdapter(
+        AdUnitLayout adWhirlLayout,
+         Ration ration, Extra extra
+     ) {
         try {
             switch (ration.getNetworkId()) {
                 case AdWhirlUtil.NETWORK_TYPE_ADMOB:
@@ -149,11 +189,10 @@ public abstract class AdWhirlAdapter {
             return unknownAdNetwork(adWhirlLayout, ration);
         }
     }
-
-    private static AdWhirlAdapter getNetworkAdapter(String networkAdapter,
-                                                    AdUnitLayout adWhirlLayout,
-                                                    Ration ration,
-                                                    Extra extra) {
+    private static AdWhirlAdapter getNetworkAdapter(
+        String networkAdapter, AdUnitLayout adWhirlLayout,
+        Ration ration, Extra extra
+    ) {
         AdWhirlAdapter adWhirlAdapter = null;
 
         try {
@@ -185,26 +224,13 @@ public abstract class AdWhirlAdapter {
 
         return adWhirlAdapter;
     }
-
-    private static AdWhirlAdapter unknownAdNetwork(AdUnitLayout adWhirlLayout,
-                                                   Ration ration) {
+    private static AdWhirlAdapter unknownAdNetwork(
+        AdUnitLayout adWhirlLayout,
+        Ration ration
+    ) {
         Log.w(LocadzUtils.LOG_TAG, "Unsupported ration type: " + ration.getNetworkId());
         return null;
     }
-
-    public static AdWhirlAdapter handle(AdUnitLayout adWhirlLayout, Ration ration, Extra extra) throws
-        Throwable {
-        AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration, extra);
-        if (adapter != null) {
-            Log.d(LocadzUtils.LOG_TAG, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
-            adapter.handle();
-        } else {
-            throw new Exception("Invalid adapter");
-        }
-        return adapter;
-    }
-
-    public abstract void handle();
 
     /**
      * Added to tell adapter that it's view will be destroyed.<p>
@@ -222,19 +248,13 @@ public abstract class AdWhirlAdapter {
     public static void setGoogleAdSenseCompanyName(String name) {
         googleAdSenseCompanyName = name;
     }
-
     public static void setGoogleAdSenseAppName(String name) {
         googleAdSenseAppName = name;
     }
-
     public static void setGoogleAdSenseChannel(String channel) {
         googleAdSenseChannel = channel;
     }
-
     public static void setGoogleAdSenseExpandDirection(String direction) {
         googleAdSenseExpandDirection = direction;
     }
-
-
-
 }
