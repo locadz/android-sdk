@@ -26,6 +26,9 @@ import com.locadz.model.Ration;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This base class provides essence of environment for advertising adapter.<p>
@@ -78,7 +81,8 @@ public abstract class AdWhirlAdapter {
     }
 
     /**
-     * This utility method constructs a new {@link AdWhirlAdapter} by {@link Ration#getNetworkId}.<p>
+     * This utility method constructs a new {@link AdWhirlAdapter} by {@link Ration#getNetworkId} and
+     * calls the {@link AdWhirlAdapter.handle} to initialize advertising service.<p>
      *
      * @param adWhirlLayout The object of parent layout
      * @param ration The meta-data of advertisement service
@@ -89,147 +93,32 @@ public abstract class AdWhirlAdapter {
     public static AdWhirlAdapter handle(
         AdUnitLayout adWhirlLayout, Ration ration, Extra extra
     ) throws Throwable {
-        AdWhirlAdapter adapter = AdWhirlAdapter.getAdapter(adWhirlLayout, ration, extra);
-        if (adapter != null) {
+        AdWhirlAdapter adapter;
+
+        /**
+         * Builds the adapter
+         */
+        try {
+            adapter = new AdapterBuilder(adWhirlLayout, ration, extra).buildAdapter();
+        } catch (BuildAdapterException e) {
+            Log.e(LocadzUtils.LOG_TAG, "Exception occur when building adapter", e);
+            throw e;
+        }
+        // :~)
+
+        /**
+         * Call handle() of built adapter
+         */
+        try {
             Log.d(LocadzUtils.LOG_TAG, String.format("Valid adapter %s, calling handle()", adapter.getClass().getSimpleName()));
             adapter.handle();
-        } else {
-            throw new Exception("Invalid adapter");
+        } catch (Exception e) {
+            Log.e(LocadzUtils.LOG_TAG, String.format("Handle() of adapter(%s) error", adapter.getClass().getSimpleName()), e);
+            throw new Exception("Handle of adapter error", e);
         }
+        // :~)
+
         return adapter;
-    }
-    private static AdWhirlAdapter getAdapter(
-        AdUnitLayout adWhirlLayout,
-         Ration ration, Extra extra
-     ) {
-        try {
-            switch (ration.getNetworkId()) {
-                case AdWhirlUtil.NETWORK_TYPE_ADMOB:
-                    if (Class.forName("com.google.ads.AdView") != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.GoogleAdMobAdsAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_INMOBI:
-                    if (Class.forName("com.inmobi.androidsdk.IMAdView")
-                        != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.InMobiAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_QUATTRO:
-                    if (Class.forName("com.qwapi.adclient.android.view.QWAdView")
-                        != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.QuattroAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_MILLENNIAL:
-                    if (Class.forName("com.millennialmedia.android.MMAdView") != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.MillennialAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_ADSENSE:
-                    if (Class.forName("com.google.ads.GoogleAdView") != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.AdSenseAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_ZESTADZ:
-                    if (Class.forName("com.zestadz.android.ZestADZAdView") != null) {
-                        return getNetworkAdapter("com.adwhirl.adapters.ZestAdzAdapter",
-                            adWhirlLayout, ration, extra);
-                    } else {
-                        return unknownAdNetwork(adWhirlLayout, ration);
-                    }
-
-                case AdWhirlUtil.NETWORK_TYPE_MDOTM:
-                    return getNetworkAdapter("com.adwhirl.adapters.MdotMAdapter",
-                        adWhirlLayout, ration, extra);
-
-                case AdWhirlUtil.NETWORK_TYPE_ONERIOT:
-                    return getNetworkAdapter("com.adwhirl.adapters.OneRiotAdapter",
-                        adWhirlLayout, ration, extra);
-
-                case AdWhirlUtil.NETWORK_TYPE_NEXAGE:
-                    return getNetworkAdapter("com.adwhirl.adapters.NexageAdapter",
-                        adWhirlLayout, ration, extra);
-
-                case AdWhirlUtil.NETWORK_TYPE_MOBCLIX:
-                    return getNetworkAdapter("com.adwhirl.adapters.MobclixAdapter",
-                        adWhirlLayout, ration, extra);
-
-//                case AdWhirlUtil.NETWORK_TYPE_CUSTOM:
-//                    return new CustomAdapter(adWhirlLayout, ration, extra);
-//
-//                case AdWhirlUtil.NETWORK_TYPE_GENERIC:
-//                    return new GenericAdapter(adWhirlLayout, ration, extra);
-//
-//                case AdWhirlUtil.NETWORK_TYPE_EVENT:
-//                    return new EventAdapter(adWhirlLayout, ration, extra);
-
-                default:
-                    return unknownAdNetwork(adWhirlLayout, ration);
-            }
-        } catch (ClassNotFoundException e) {
-            return unknownAdNetwork(adWhirlLayout, ration);
-        } catch (VerifyError e) {
-            Log.e("AdWhirl", "Caught VerifyError", e);
-            return unknownAdNetwork(adWhirlLayout, ration);
-        }
-    }
-    private static AdWhirlAdapter getNetworkAdapter(
-        String networkAdapter, AdUnitLayout adWhirlLayout,
-        Ration ration, Extra extra
-    ) {
-        AdWhirlAdapter adWhirlAdapter = null;
-
-        try {
-            @SuppressWarnings("unchecked")
-            Class<? extends AdWhirlAdapter> adapterClass =
-                (Class<? extends AdWhirlAdapter>) Class.forName(networkAdapter);
-
-            Class<?>[] parameterTypes = new Class[3];
-            parameterTypes[0] = AdUnitLayout.class;
-            parameterTypes[1] = Ration.class;
-            parameterTypes[2] = Extra.class;
-
-            Constructor<? extends AdWhirlAdapter> constructor =
-                adapterClass.getConstructor(parameterTypes);
-
-            Object[] args = new Object[3];
-            args[0] = adWhirlLayout;
-            args[1] = ration;
-            args[2] = extra;
-
-            adWhirlAdapter = constructor.newInstance(args);
-        } catch (ClassNotFoundException e) {
-        } catch (SecurityException e) {
-        } catch (NoSuchMethodException e) {
-        } catch (InvocationTargetException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InstantiationException e) {
-        }
-
-        return adWhirlAdapter;
-    }
-    private static AdWhirlAdapter unknownAdNetwork(
-        AdUnitLayout adWhirlLayout,
-        Ration ration
-    ) {
-        Log.w(LocadzUtils.LOG_TAG, "Unsupported ration type: " + ration.getNetworkId());
-        return null;
     }
 
     /**
@@ -256,5 +145,142 @@ public abstract class AdWhirlAdapter {
     }
     public static void setGoogleAdSenseExpandDirection(String direction) {
         googleAdSenseExpandDirection = direction;
+    }
+}
+
+/**
+ * This builder is used to build {@link AdWhirlAdapter}.<p>
+ *
+ * WARNING: Because this class hold a reference to {@link AdUnitLayout},
+ * you must not hold the instance of this build in long-term lifetime.<p>
+ */
+class AdapterBuilder {
+    private AdUnitLayout adWhirlLayout;
+    private Ration ration;
+    private Extra extra;
+
+    private final static Map<Integer, AdapterInfo> mapOfAdapters; // The mapping information for building adapter
+    static {
+        /**
+         * Construct the mapping of building adapters
+         */
+        Map<Integer, AdapterInfo> processMap = new HashMap<Integer, AdapterInfo>(10);
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADMOB, new AdapterInfo("com.google.ads.AdView", GoogleAdMobAdsAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_INMOBI, new AdapterInfo("com.inmobi.androidsdk.IMAdView", InMobiAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MILLENNIAL, new AdapterInfo("com.millennialmedia.android.MMAdView", MillennialAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADSENSE, new AdapterInfo("com.google.ads.GoogleAdView", AdSenseAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ZESTADZ, new AdapterInfo("com.zestadz.android.ZestADZAdView", ZestAdzAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MOBCLIX, new AdapterInfo("com.mobclix.android.sdk.MobclixAdView", MobclixAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MDOTM, new AdapterInfo("com.mdotm.android.ads.MdotMView", MdotMAdapter.class));
+
+        mapOfAdapters = Collections.unmodifiableMap(processMap);
+        // :~)
+    }
+
+    AdapterBuilder(AdUnitLayout newAdWhirlLayout, Ration newRation, Extra newExtra)
+    {
+        adWhirlLayout = newAdWhirlLayout;
+        ration = newRation;
+        extra = newExtra;
+    }
+
+    /**
+     * Build adapter by id of advertising network.<p>
+     */
+    AdWhirlAdapter buildAdapter() throws BuildAdapterException
+    {
+        if (!mapOfAdapters.containsKey(ration.getNetworkId())) {
+            String message = "Unsupported network: [" + ration.getNetworkId() + "]";
+            Log.w(LocadzUtils.LOG_TAG, message);
+            throw new BuildAdapterException(message);
+        }
+
+        AdapterInfo buildInfo = mapOfAdapters.get(ration.getNetworkId());
+        return checkAndBuildAdapter(buildInfo.dependencyClassName, buildInfo.classOfAdapter);
+    }
+
+    private AdWhirlAdapter checkAndBuildAdapter(
+        String classNameOfDependency, Class<? extends AdWhirlAdapter> classOfAdapter
+    ) throws BuildAdapterException
+    {
+        if (Log.isLoggable(LocadzUtils.LOG_TAG, Log.VERBOSE)) {
+            Log.v(LocadzUtils.LOG_TAG,
+                String.format(
+                    "Processing dependency[%s] for adapter[%s]",
+                    classNameOfDependency, classOfAdapter.getSimpleName()
+                )
+            );
+        }
+
+        /**
+         * Check the dependency of library from advertising service
+         */
+        if (!hasClassForName(classNameOfDependency)) {
+            String message = "The dependency for network: [" + ration.getNetworkId() + "] is not exists. class: [" + classNameOfDependency + "]";
+            Log.w(LocadzUtils.LOG_TAG, message);
+            throw new BuildAdapterException(message);
+        }
+        // :~)
+
+        AdWhirlAdapter adWhirlAdapter = null;
+
+        try {
+            Class<?>[] parameterTypes = new Class[3];
+            parameterTypes[0] = AdUnitLayout.class;
+            parameterTypes[1] = Ration.class;
+            parameterTypes[2] = Extra.class;
+
+            Constructor<? extends AdWhirlAdapter> constructor = classOfAdapter.getConstructor(parameterTypes);
+
+            Object[] args = new Object[3];
+            args[0] = adWhirlLayout;
+            args[1] = ration;
+            args[2] = extra;
+
+            adWhirlAdapter = constructor.newInstance(args);
+        } catch (Exception e) {
+            throw new BuildAdapterException(e);
+        }
+
+        return adWhirlAdapter;
+    }
+
+    private boolean hasClassForName(String className)
+    {
+        try {
+            Class.forName(className);
+            if (Log.isLoggable(LocadzUtils.LOG_TAG, Log.VERBOSE)) {
+                Log.v(LocadzUtils.LOG_TAG, "Loading dependency library [" + className + "] successfully");
+            }
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private static class AdapterInfo {
+        String dependencyClassName;
+        Class<? extends AdWhirlAdapter> classOfAdapter;
+
+        AdapterInfo(String dependencyClassName, Class<? extends AdWhirlAdapter> classOfAdapter)
+        {
+            this.dependencyClassName = dependencyClassName;
+            this.classOfAdapter = classOfAdapter;
+        }
+    }
+}
+
+/**
+ * This exception wrapper exceptions generated from construct instance of {@link AdWhirlAdapter}.<p>
+ */
+class BuildAdapterException extends Exception {
+    BuildAdapterException(String message)
+    {
+        super("Build Adapter error: " + message);
+    }
+    BuildAdapterException(Throwable cause)
+    {
+        super(cause);
     }
 }
