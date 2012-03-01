@@ -1,12 +1,12 @@
 /*
  Copyright 2009-2010 AdMob, Inc.
- 
+
     Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
- 
+
   http://www.apache.org/licenses/LICENSE-2.0
- 
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,12 +28,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 public abstract class AdWhirlAdapter {
-    
+
     private final WeakReference<AdUnitLayout> layoutReference;
     protected final Ration ration;
 
     protected final Extra extra;
-    
+
     public AdWhirlAdapter(AdUnitLayout layout, Ration ration, Extra extra) {
         this.layoutReference = new WeakReference<AdUnitLayout>(layout);
         this.ration = ration;
@@ -126,6 +126,10 @@ public abstract class AdWhirlAdapter {
                     return getNetworkAdapter("com.adwhirl.adapters.NexageAdapter",
                         adWhirlLayout, ration, extra);
 
+                case AdWhirlUtil.NETWORK_TYPE_MOBCLIX:
+                    return getNetworkAdapter("com.adwhirl.adapters.MobclixAdapter",
+                        adWhirlLayout, ration, extra);
+
 //                case AdWhirlUtil.NETWORK_TYPE_CUSTOM:
 //                    return new CustomAdapter(adWhirlLayout, ration, extra);
 //
@@ -202,8 +206,11 @@ public abstract class AdWhirlAdapter {
 
     public abstract void handle();
 
-    // Added to tell adapter that it's view will be destroyed.
-    public void willDestroy() {
+    /**
+     * Added to tell adapter that it's view will be destroyed.<p>
+     */
+    public void willDestroy()
+    {
         Log.d(LocadzUtils.LOG_TAG, "Generic adapter will get destroyed");
     }
 
