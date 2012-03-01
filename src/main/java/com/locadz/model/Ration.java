@@ -23,7 +23,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.io.Serializable;
 
 /**
+ * This bean represents the meta-data of advertising services.<p>
  *
+ * @see #getKey
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Ration implements Serializable {
@@ -73,6 +75,9 @@ public class Ration implements Serializable {
         return priority;
     }
 
+    /**
+     * The key which is registered in service provider, this key is used to connect to service.<p>
+     */
     public String getKey() {
         return key;
     }

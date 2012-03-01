@@ -23,10 +23,14 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import java.io.Serializable;
 
 /**
+ * This bean represents extra parameters used to configure
+ * certain {@link com.adwhirl.util.AdWhirlAdapter} of particular advertising service.<p>
  *
+ * Not all data in this object would be used in implementation of adapter;
+ * To understand the detailed usage of extra, see the documentation of adapter implementation.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public final class Extra  implements Serializable {
+public final class Extra implements Serializable {
 
     private static final long serialVersionUID = 1;
 
