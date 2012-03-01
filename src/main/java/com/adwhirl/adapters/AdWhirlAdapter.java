@@ -165,13 +165,13 @@ class AdapterBuilder {
          * Construct the mapping of building adapters
          */
         Map<Integer, AdapterInfo> processMap = new HashMap<Integer, AdapterInfo>(10);
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADMOB, new AdapterInfo("com.google.ads.AdView", GoogleAdMobAdsAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_INMOBI, new AdapterInfo("com.inmobi.androidsdk.IMAdView", InMobiAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_MILLENNIAL, new AdapterInfo("com.millennialmedia.android.MMAdView", MillennialAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADSENSE, new AdapterInfo("com.google.ads.GoogleAdView", AdSenseAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_ZESTADZ, new AdapterInfo("com.zestadz.android.ZestADZAdView", ZestAdzAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_MOBCLIX, new AdapterInfo("com.mobclix.android.sdk.MobclixAdView", MobclixAdapter.class));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_MDOTM, new AdapterInfo("com.mdotm.android.ads.MdotMView", MdotMAdapter.class));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADMOB, new AdapterInfo("com.google.ads.AdView", "com.adwhirl.adapters.GoogleAdMobAdsAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ADSENSE, new AdapterInfo("com.google.ads.GoogleAdView", "com.adwhirl.adapters.AdSenseAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_INMOBI, new AdapterInfo("com.inmobi.androidsdk.IMAdView", "com.adwhirl.adapters.InMobiAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MDOTM, new AdapterInfo("com.mdotm.android.ads.MdotMView", "com.adwhirl.adapters.MdotMAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MILLENNIAL, new AdapterInfo("com.millennialmedia.android.MMAdView", "com.adwhirl.adapters.MillennialAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MOBCLIX, new AdapterInfo("com.mobclix.android.sdk.MobclixAdView", "com.adwhirl.adapters.MobclixAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_ZESTADZ, new AdapterInfo("com.zestadz.android.ZestADZAdView", "com.adwhirl.adapters.ZestAdzAdapter"));
 
         mapOfAdapters = Collections.unmodifiableMap(processMap);
         // :~)
@@ -195,19 +195,30 @@ class AdapterBuilder {
             throw new BuildAdapterException(message);
         }
 
+        /**
+         * Load mapping of adapter and class of adapter
+         */
         AdapterInfo buildInfo = mapOfAdapters.get(ration.getNetworkId());
-        return checkAndBuildAdapter(buildInfo.dependencyClassName, buildInfo.classOfAdapter);
+
+        try {
+            return checkAndBuildAdapter(buildInfo.dependencyClassName, (Class<AdWhirlAdapter>)Class.forName(buildInfo.adapterClassName));
+        } catch (ClassNotFoundException e) {
+            String message = "Can't load adapter: " + buildInfo.adapterClassName;
+            Log.w(LocadzUtils.LOG_TAG, message);
+            throw new BuildAdapterException(message);
+        }
+        // :~)
     }
 
     private AdWhirlAdapter checkAndBuildAdapter(
-        String classNameOfDependency, Class<? extends AdWhirlAdapter> classOfAdapter
+        String classNameOfDependency, Class<AdWhirlAdapter> adapterClassName
     ) throws BuildAdapterException
     {
         if (Log.isLoggable(LocadzUtils.LOG_TAG, Log.VERBOSE)) {
             Log.v(LocadzUtils.LOG_TAG,
                 String.format(
                     "Processing dependency[%s] for adapter[%s]",
-                    classNameOfDependency, classOfAdapter.getSimpleName()
+                    classNameOfDependency, adapterClassName.getSimpleName()
                 )
             );
         }
@@ -230,7 +241,7 @@ class AdapterBuilder {
             parameterTypes[1] = Ration.class;
             parameterTypes[2] = Extra.class;
 
-            Constructor<? extends AdWhirlAdapter> constructor = classOfAdapter.getConstructor(parameterTypes);
+            Constructor<AdWhirlAdapter> constructor = adapterClassName.getConstructor(parameterTypes);
 
             Object[] args = new Object[3];
             args[0] = adWhirlLayout;
@@ -261,12 +272,12 @@ class AdapterBuilder {
 
     private static class AdapterInfo {
         String dependencyClassName;
-        Class<? extends AdWhirlAdapter> classOfAdapter;
+        String adapterClassName;
 
-        AdapterInfo(String dependencyClassName, Class<? extends AdWhirlAdapter> classOfAdapter)
+        AdapterInfo(String dependencyClassName, String adapterClassName)
         {
             this.dependencyClassName = dependencyClassName;
-            this.classOfAdapter = classOfAdapter;
+            this.adapterClassName = adapterClassName;
         }
     }
 }
