@@ -63,13 +63,18 @@ public class Invoker extends Activity {
         width = (int) (width * density);
         height = (int) (height * density);
 
-        AdWhirlTargeting.setAge(23);
-        AdWhirlTargeting.setGender(AdWhirlTargeting.Gender.MALE);
-        String keywords[] = { "online", "games", "gaming" };
-        AdWhirlTargeting
-            .setKeywordSet(new HashSet<String>(Arrays.asList(keywords)));
-        AdWhirlTargeting.setPostalCode("94123");
-        AdWhirlTargeting.setTestMode(false);
+        /**
+         * Setup the preference for advertising
+         */
+        AdvertisingPreference adPreference = new AdvertisingPreference();
+        adPreference.setAge(23);
+        adPreference.setGender(AdvertisingPreference.Gender.MALE);
+        adPreference.setKeywordSet(new HashSet<String>(Arrays.asList(
+            new String[] { "online", "games", "gaming" }
+        )));
+        adPreference.setPostalCode("94123");
+        adPreference.setTestMode(false);
+        // :~)
 
         AdWhirlAdapter.setGoogleAdSenseAppName("AdWhirl Test App");
         AdWhirlAdapter.setGoogleAdSenseCompanyName("AdWhirl");
@@ -85,6 +90,7 @@ public class Invoker extends Activity {
         // only.
         // You should check with ad networks on their specific policies.
         AdUnitLayout adWhirlLayout2 = new AdUnitLayout(this, "46a9e26bb1f5499ab7b00c9807ae034b");
+        adWhirlLayout2.setAdvertisingPreference(adPreference);
 
         RelativeLayout.LayoutParams adWhirlLayoutParams = new RelativeLayout.LayoutParams(
             RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);

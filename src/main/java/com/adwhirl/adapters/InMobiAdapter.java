@@ -2,8 +2,8 @@ package com.adwhirl.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdWhirlTargeting;
-import com.adwhirl.AdWhirlTargeting.Gender;
+import com.adwhirl.AdvertisingPreference;
+import com.adwhirl.AdvertisingPreference.Gender;
 import com.inmobi.androidsdk.IMAdListener;
 import com.inmobi.androidsdk.IMAdRequest;
 import com.inmobi.androidsdk.IMAdRequest.ErrorCode;
@@ -46,12 +46,12 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
         IMAdView adView = new IMAdView(activity, adUnit, ration.getKey());
         adView.setIMAdListener(this);
         IMAdRequest imAdRequest = new IMAdRequest();
-        imAdRequest.setAge(AdWhirlTargeting.getAge());
+        imAdRequest.setAge(getAdvertisingPreference().getAge());
         imAdRequest.setGender(this.getGender());
         imAdRequest.setLocationInquiryAllowed(extra.isLocationOn());
-        imAdRequest.setTestMode(AdWhirlTargeting.getTestMode());
-        imAdRequest.setKeywords(AdWhirlTargeting.getKeywords());
-        imAdRequest.setPostalCode(AdWhirlTargeting.getPostalCode());
+        imAdRequest.setTestMode(getAdvertisingPreference().getTestMode());
+        imAdRequest.setKeywords(getAdvertisingPreference().getKeywords());
+        imAdRequest.setPostalCode(getAdvertisingPreference().getPostalCode());
 
         // Setting tp key based on InMobi's implementation of this adapter.
         Map<String, String> map = new HashMap<String, String>();
@@ -90,7 +90,7 @@ public final class InMobiAdapter extends AdWhirlAdapter implements IMAdListener 
     }
 
     public GenderType getGender() {
-        Gender gender = AdWhirlTargeting.getGender();
+        Gender gender = getAdvertisingPreference().getGender();
         if (Gender.MALE == gender) {
             return GenderType.MALE;
         }

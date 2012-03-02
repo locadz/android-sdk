@@ -2,7 +2,7 @@ package com.adwhirl.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdWhirlTargeting;
+import com.adwhirl.AdvertisingPreference;
 import com.locadz.AdUnitLayout;
 import com.locadz.LocadzUtils;
 import com.locadz.model.Extra;
@@ -75,7 +75,7 @@ public class MobclixAdapter extends AdWhirlAdapter {
          */
         Log.v(LocadzUtils.LOG_TAG, "Initialize MobclixAdView");
         MobclixAdView adView = new MobclixMMABannerXLAdView(activity);
-        adView.addMobclixAdViewListener(new MobclixAdapterListener(AdWhirlTargeting.getKeywords()));
+        adView.addMobclixAdViewListener(new MobclixAdapterListener(getAdvertisingPreference().getKeywords()));
         adView.getAd();
         // :~)
     }

@@ -1,12 +1,12 @@
 /*
  Copyright 2009-2010 AdMob, Inc.
- 
+
     Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
- 
+
   http://www.apache.org/licenses/LICENSE-2.0
- 
+
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,8 +20,8 @@ import android.app.Activity;
 import android.location.Location;
 import android.text.TextUtils;
 import android.util.Log;
-import com.adwhirl.AdWhirlTargeting;
-import com.adwhirl.AdWhirlTargeting.Gender;
+import com.adwhirl.AdvertisingPreference;
+import com.adwhirl.AdvertisingPreference.Gender;
 import com.locadz.AdUnitLayout;
 import com.locadz.LocadzUtils;
 import com.locadz.model.Extra;
@@ -48,25 +48,25 @@ public class MillennialAdapter extends AdWhirlAdapter implements MMAdListener {
 
         Hashtable<String, String> map = new Hashtable<String, String>();
 
-        final AdWhirlTargeting.Gender gender = AdWhirlTargeting.getGender();
+        final AdvertisingPreference.Gender gender = getAdvertisingPreference().getGender();
         if (gender == Gender.MALE) {
             map.put(MMAdView.KEY_GENDER, "male");
         } else if (gender == Gender.FEMALE) {
             map.put(MMAdView.KEY_GENDER, "female");
         }
 
-        final int age = AdWhirlTargeting.getAge();
+        final int age = getAdvertisingPreference().getAge();
         if (age != -1) {
             map.put(MMAdView.KEY_AGE, String.valueOf(age));
         }
 
-        final String postalCode = AdWhirlTargeting.getPostalCode();
+        final String postalCode = getAdvertisingPreference().getPostalCode();
         if (!TextUtils.isEmpty(postalCode)) {
             map.put(MMAdView.KEY_ZIP_CODE, postalCode);
         }
-        final String keywords = AdWhirlTargeting.getKeywordSet() != null ? TextUtils
-            .join(",", AdWhirlTargeting.getKeywordSet())
-            : AdWhirlTargeting.getKeywords();
+        final String keywords = getAdvertisingPreference().getKeywordSet() != null ? TextUtils
+            .join(",", getAdvertisingPreference().getKeywordSet())
+            : getAdvertisingPreference().getKeywords();
         if (!TextUtils.isEmpty(keywords)) {
             map.put(MMAdView.KEY_KEYWORDS, keywords);
         }

@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import com.adwhirl.adapters.AdWhirlAdapter;
+import com.adwhirl.AdvertisingPreference;
 import com.locadz.model.Extra;
 import com.locadz.model.Ration;
 
@@ -73,6 +74,8 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  *          using the previous used cycle time.</li>
  *  </ul>
  *
+ * An {@link AdvertisingPreference} is hold in this layout which couled be used in {@link AdWhirlAdapter} to configure the preference of advertising.
+ * See {@link #setAdvertisingPreference}<p>
  *
  * TODO: add fetch location code.
  * TODO: implements stop scheduling when activity is not visible.
@@ -114,6 +117,8 @@ public class AdUnitLayout extends RelativeLayout {
      */
     private boolean visible = true;
 
+    private AdvertisingPreference advertisingPreference = new AdvertisingPreference();
+
     /**
      * Constructor for XML style.
      *
@@ -137,6 +142,23 @@ public class AdUnitLayout extends RelativeLayout {
         super(context);
         init(context, adUnitId);
     }
+
+    /**
+     * Sets the preference of advertising.<p>
+     *
+     * @param newAdvertisingPreference The preference of advertising for this layout
+     *
+     * @see #getAdvertisingPreference
+     */
+    public void setAdvertisingPreference(AdvertisingPreference newAdvertisingPreference) { this.advertisingPreference = newAdvertisingPreference; }
+    /**
+     * Gets the preference of advertising.<p>
+     *
+     * @return The advertising preference of this layour
+     *
+     * @see #setAdvertisingPreference
+     */
+    public AdvertisingPreference getAdvertisingPreference() { return new AdvertisingPreference(this.advertisingPreference); }
 
     /**
      * Submit a reload AD request asynchronously.

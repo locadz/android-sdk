@@ -17,6 +17,7 @@
 package com.adwhirl.adapters;
 
 import android.util.Log;
+import com.adwhirl.AdvertisingPreference;
 import com.adwhirl.util.AdWhirlUtil;
 import com.locadz.AdUnitLayout;
 import com.locadz.LocadzUtils;
@@ -44,6 +45,9 @@ public abstract class AdWhirlAdapter {
     protected final Ration ration;
     protected final Extra extra;
 
+    // The preference of advertising for this adapter
+    private final AdvertisingPreference advertisingPreference;
+
     /**
      * This method would be called when this adapter is choosed as target network of advertisement.<p>
      */
@@ -61,6 +65,8 @@ public abstract class AdWhirlAdapter {
         this.layoutReference = new WeakReference<AdUnitLayout>(layout);
         this.ration = ration;
         this.extra = extra;
+
+        advertisingPreference = layout.getAdvertisingPreference();
     }
 
     public AdUnitLayout getLocadzLayout() {
@@ -68,6 +74,16 @@ public abstract class AdWhirlAdapter {
     }
     public Extra getExtra() {
         return extra;
+    }
+    /**
+     * Gets the advertising preference of this adapter,
+     * which comes from {@link AdUnitLayout} object while constructing this object.<p>
+     *
+     * @see AdUnitLayout#getAdvertisingPreference()
+     */
+    public AdvertisingPreference getAdvertisingPreference()
+    {
+        return advertisingPreference;
     }
 
     protected boolean isVisible() {
@@ -88,7 +104,7 @@ public abstract class AdWhirlAdapter {
      * @param ration The meta-data of advertisement service
      * @param extra The extra parameters for advertisement service
      *
-     * @see AdWhirlTargeting
+     * @see com.adwhirl.AdvertisingPreference
      */
     public static AdWhirlAdapter handle(
         AdUnitLayout adWhirlLayout, Ration ration, Extra extra

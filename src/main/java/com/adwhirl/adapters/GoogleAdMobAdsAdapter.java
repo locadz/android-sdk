@@ -19,7 +19,7 @@ package com.adwhirl.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import com.adwhirl.AdWhirlTargeting;
+import com.adwhirl.AdvertisingPreference;
 import com.adwhirl.util.AdWhirlUtil;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
@@ -42,14 +42,14 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
         super(locadzLayout, ration, extra);
     }
 
-    protected String birthdayForAdWhirlTargeting() {
-        return (AdWhirlTargeting.getBirthDate() != null) ?
+    protected String getBirthdayForPreference() {
+        return (getAdvertisingPreference().getBirthDate() != null) ?
             new SimpleDateFormat("yyyyMMdd").
-                format(AdWhirlTargeting.getBirthDate().getTime()) : null;
+                format(getAdvertisingPreference().getBirthDate().getTime()) : null;
     }
 
-    protected AdRequest.Gender genderForAdWhirlTargeting() {
-        switch (AdWhirlTargeting.getGender()) {
+    protected AdRequest.Gender getGenderForPreference() {
+        switch (getAdvertisingPreference().getGender()) {
             case MALE:
                 return AdRequest.Gender.MALE;
             case FEMALE:
@@ -93,11 +93,11 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
     protected AdRequest requestForAdWhirlLayout(AdUnitLayout layout) {
         AdRequest result = new AdRequest();
 
-        if (AdWhirlTargeting.getTestMode()) {
+        if (getAdvertisingPreference().getTestMode()) {
             result.addTestDevice(AdRequest.TEST_EMULATOR);
         }
 
-        if (AdWhirlTargeting.getTestMode()) {
+        if (getAdvertisingPreference().getTestMode()) {
             Activity activity = layout.getActivity();
             if (activity != null) {
                 Context context = activity.getApplicationContext();
@@ -105,14 +105,14 @@ public class GoogleAdMobAdsAdapter extends AdWhirlAdapter implements AdListener 
                 result.addTestDevice(deviceId);
             }
         }
-        result.setGender(genderForAdWhirlTargeting());
-        result.setBirthday(birthdayForAdWhirlTargeting());
+        result.setGender(getGenderForPreference());
+        result.setBirthday(getBirthdayForPreference());
 
         if (getExtra().isLocationOn()) {
             result.setLocation(layout.getAdUnitContext().getLocation());
         }
 
-        result.setKeywords(AdWhirlTargeting.getKeywordSet());
+        result.setKeywords(getAdvertisingPreference().getKeywordSet());
 
         return result;
     }
