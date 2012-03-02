@@ -1,0 +1,25 @@
+<!--
+  ~ Copyright (c) 2012. Blue Tang Studio LLC. All rights reserved.
+  -->
+<assembly>
+  <id>with-jackson</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>/</outputDirectory>
+      <unpack>true</unpack>
+      <scope>runtime</scope>
+      <includes>
+        <include>org.codehaus.jackson:*</include>
+      </includes>
+    </dependencySet>
+  </dependencySets>
+</assembly>
