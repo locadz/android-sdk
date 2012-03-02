@@ -27,16 +27,26 @@ import android.os.Bundle;
 import java.net.URI;
 
 /**
- *
+ * This utility defines miscellaneous features in this project.<p>
  */
 public class LocadzUtils {
-
+    /**
+     * Every logging tag in this project <b>should use this tag</b>.<p>
+     */
     public static final String LOG_TAG = "Locadz";
 
-    private static final String INFO_URI = "http://api.locadz.com/rest/v1?appid=%s&appver=%s&client=2&location=%s";
+    /**
+     * The string of format to generate URI for service of Locadz.<p>
+     */
+    private static final String INFO_URI_FORMAT = "http://api.locadz.com/rest/v1?appid=%s&appver=%s&client=2&location=%s";
 
-    public static final URI getInfoUri(AdUnitContext context) {
-
+    /**
+     * Generate the URI from context of AD unit for requesting service of Locadz.<p>
+     *
+     * @param context The context of AD unit
+     */
+    public static final URI getInfoUri(AdUnitContext context)
+    {
         String locationString = "";
 
         Location location = context.getLocation();
@@ -44,8 +54,7 @@ public class LocadzUtils {
             locationString = String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude());
         }
 
-        return URI.create(String.format(INFO_URI, context.getAdUnitId(), context.getAppVersion(), locationString));
-
+        return URI.create(String.format(INFO_URI_FORMAT, context.getAdUnitId(), context.getAppVersion(), locationString));
     }
 
     /**
@@ -53,7 +62,8 @@ public class LocadzUtils {
      * @param context   the context.
      * @return  the api key or null.
      */
-    protected static String getAdUnitId(Context context) {
+    protected static String getAdUnitId(Context context)
+    {
         final String packageName = context.getPackageName();
         final String activityName = context.getClass().getName();
         final PackageManager pm = context.getPackageManager();
@@ -85,5 +95,4 @@ public class LocadzUtils {
         }
         return null;
     }
-
 }

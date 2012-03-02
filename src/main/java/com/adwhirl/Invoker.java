@@ -31,13 +31,17 @@ import com.locadz.AdUnitLayout;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/**
+ * This {@link Activity} is used to be cited as example of usage for this project.<p>
+ */
 public class Invoker extends Activity {
     // For more easily detecting memory leaks.
     // byte[] garbage = new byte[1000 * 1024];
 
     /** Called when the activity is first created. */
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
