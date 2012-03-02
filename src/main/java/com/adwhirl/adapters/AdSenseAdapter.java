@@ -78,9 +78,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
         final int age = getAdvertisingPreference().getAge();
         spec.setAge(age);
 
-        final String keywords = getAdvertisingPreference().getKeywordSet() != null ? TextUtils
-            .join(",", getAdvertisingPreference().getKeywordSet())
-            : getAdvertisingPreference().getKeywords();
+        final String keywords = getAdvertisingPreference().getKeywords();
         if (!TextUtils.isEmpty(keywords)) {
             spec.setKeywords(keywords);
         }

@@ -1,5 +1,7 @@
 package com.adwhirl;
 
+import android.text.TextUtils;
+
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.GregorianCalendar;
@@ -52,7 +54,6 @@ public class AdvertisingPreference {
         setTestMode(anotherPreference.getTestMode());
         setGender(anotherPreference.getGender());
         setPostalCode(anotherPreference.getPostalCode());
-        setKeywords(anotherPreference.getKeywords());
         setKeywordSet(anotherPreference.getKeywordSet());
     }
 
@@ -162,36 +163,24 @@ public class AdvertisingPreference {
     public String getPostalCode() { return this.postalCode; }
 
     /**
-     * Sets the keyword for advertising as literal string.<p>
+     * Gets the keyword for advertising as literal string seperated by ",".<p>
      *
-     * This method is irrelevent to {@link #setKeywordSet}.<p>
-     *
-     * @param newKeywords The value of liberal keywords
-     *
-     * @see #setKeywordSet
-     * @see #getKeyword
-     */
-    public void setKeywords(String newKeywords) { this.keywords = newKeywords; }
-    /**
-     * Gets the keyword for advertising as literal string.<p>
-     *
-     * This method is irrelevent to {@link #getKeywordSet}.<p>
+     * This method is the data of keywords from {@link #getKeywordSet}.<p>
      *
      * @return The value of keyword as literal string
      *
      * @see #getKeywordSet
-     * @see #setKeyword
      */
-    public String getKeywords() { return this.keywords; }
+    public String getKeywords()
+    {
+        return TextUtils.join(",", getKeywordSet());
+    }
 
     /**
      * Sets the keyword for advertising as set of strings.<p>
      *
-     * This method is irrelevent to {@link #setKeyword}.<p>
-     *
      * @param newKeywordSet The value of a set of keywords
      *
-     * @see #setKeyword
      * @see #getKeywordSet
      */
     public void setKeywordSet(Set<String> newKeywordSet) { this.keywordSet = newKeywordSet; }

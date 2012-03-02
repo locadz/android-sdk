@@ -41,7 +41,7 @@ import com.mobclix.android.sdk.MobclixMMABannerXLAdView;
  * </li>
  * </ol>
  *
- * You may link to use 
+ * You may link to use
  * For more information, see documentations of MobClix.<p>
  */
 public class MobclixAdapter extends AdWhirlAdapter {
