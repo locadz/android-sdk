@@ -7,18 +7,25 @@
     <format>jar</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
+
   <fileSets>
     <fileSet>
       <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>res/**</include>
+        <include>AndroidManifest.xml</include>
+      </includes>
     </fileSet>
   </fileSets>
   <dependencySets>
     <dependencySet>
       <outputDirectory>/</outputDirectory>
+      <useProjectArtifact>true</useProjectArtifact>
       <unpack>true</unpack>
       <scope>runtime</scope>
       <includes>
         <include>org.codehaus.jackson:*</include>
+        <include>com.locadz:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
