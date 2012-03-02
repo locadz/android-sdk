@@ -77,10 +77,22 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  * An {@link AdvertisingPreference} is hold in this layout which couled be used in {@link AdWhirlAdapter} to configure the preference of advertising.
  * See {@link #setAdvertisingPreference}<p>
  *
+ * XML setting for layout
+ * <pre><code>
+ * <com.locadz.AdUnitLayout xmlns:locadz="http://api.locadz.com/android/"
+ *      locadz:test_mode="true" <!-- Set the ad layout for testing -->
+ *      />
+ * </code></pre>
+ *
  * TODO: add fetch location code.
  * TODO: implements stop scheduling when activity is not visible.
  */
 public class AdUnitLayout extends RelativeLayout {
+    /**
+     * The XML namespace for this layout({@value #XML_NAMESPACE}).<p>
+     */
+    public static final String XML_NAMESPACE = "http://api.locadz.com/android/";
+    public static final String XML_ATTR_TEST_MODE = "test_mode";
 
     public static final int GET_LOCATION_TIMEOUT = 30000;
     /** the adUnitId of this layout. */
@@ -129,6 +141,14 @@ public class AdUnitLayout extends RelativeLayout {
     {
         super(context, set);
         init((Activity) context, LocadzUtils.getAdUnitId(context));
+
+        /**
+         * Setup preference from XML attributes of this layout
+         */
+        AdvertisingPreference adPreference = getAdvertisingPreference();
+        adPreference.setTestMode(set.getAttributeBooleanValue(XML_NAMESPACE, XML_ATTR_TEST_MODE, adPreference.getTestMode()));
+        setAdvertisingPreference(adPreference);
+        // :~)
     }
 
     /**
