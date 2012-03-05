@@ -79,8 +79,11 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  *
  * XML setting for layout
  * <pre><code>
+ * <!-- Set the ad layout for testing -->
  * <com.locadz.AdUnitLayout xmlns:locadz="http://api.locadz.com/android/"
- *      locadz:test_mode="true" <!-- Set the ad layout for testing -->
+ *      locadz:test_mode="true"
+ *      android:layout_width="wrap_content"
+ *      android:layout_height="wrap_content"
  *      />
  * </code></pre>
  *
@@ -146,7 +149,11 @@ public class AdUnitLayout extends RelativeLayout {
          * Setup preference from XML attributes of this layout
          */
         AdvertisingPreference adPreference = getAdvertisingPreference();
-        adPreference.setTestMode(set.getAttributeBooleanValue(XML_NAMESPACE, XML_ATTR_TEST_MODE, adPreference.getTestMode()));
+        boolean testMode = set.getAttributeBooleanValue(XML_NAMESPACE, XML_ATTR_TEST_MODE, adPreference.getTestMode());
+        if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            Log.d(LOG_TAG, "Configuration for TestMode(From XML):" + testMode);
+        }
+        adPreference.setTestMode(testMode);
         setAdvertisingPreference(adPreference);
         // :~)
     }
