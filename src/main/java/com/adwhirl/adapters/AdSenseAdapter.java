@@ -8,7 +8,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import com.adwhirl.AdWhirlTargeting;
+import com.adwhirl.AdvertisingPreference;
 import com.google.ads.AdSenseSpec;
 import com.google.ads.AdSenseSpec.AdFormat;
 import com.google.ads.AdSenseSpec.ExpandDirection;
@@ -63,7 +63,7 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
 
         spec.setAdFormat(AdFormat.FORMAT_320x50);
 
-        boolean testMode = AdWhirlTargeting.getTestMode();
+        boolean testMode = getAdvertisingPreference().getTestMode();
         spec.setAdTestEnabled(testMode);
 
         adView = new GoogleAdView(locadzLayout.getContext());
@@ -72,15 +72,13 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
         Color bgColor = getExtra().getBackgroundColor();
         spec.setColorBackground(rgbToHex(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue()));
 
-        final AdWhirlTargeting.Gender gender = AdWhirlTargeting.getGender();
+        final AdvertisingPreference.Gender gender = getAdvertisingPreference().getGender();
         spec.setGender(gender);
 
-        final int age = AdWhirlTargeting.getAge();
+        final int age = getAdvertisingPreference().getAge();
         spec.setAge(age);
 
-        final String keywords = AdWhirlTargeting.getKeywordSet() != null ? TextUtils
-            .join(",", AdWhirlTargeting.getKeywordSet())
-            : AdWhirlTargeting.getKeywords();
+        final String keywords = getAdvertisingPreference().getKeywords();
         if (!TextUtils.isEmpty(keywords)) {
             spec.setKeywords(keywords);
         }
@@ -212,10 +210,10 @@ public class AdSenseAdapter extends AdWhirlAdapter implements AdViewListener {
             }
         }
 
-        public void setGender(AdWhirlTargeting.Gender gender) {
-            if (gender == AdWhirlTargeting.Gender.MALE) {
+        public void setGender(AdvertisingPreference.Gender gender) {
+            if (gender == AdvertisingPreference.Gender.MALE) {
                 genderCode = 1;
-            } else if (gender == AdWhirlTargeting.Gender.FEMALE) {
+            } else if (gender == AdvertisingPreference.Gender.FEMALE) {
                 genderCode = 2;
             } else {
                 genderCode = -1;

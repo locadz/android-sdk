@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import com.adwhirl.adapters.AdWhirlAdapter;
+import com.adwhirl.AdvertisingPreference;
 import com.locadz.model.Extra;
 import com.locadz.model.Ration;
 
@@ -49,17 +50,17 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  *
  * Workflow:
  * <ol>
- *  <li>When layout is added to an Activity. The AdUnitLayout would register a {@link BroadcastReceiver} 
+ *  <li>When layout is added to an Activity. The AdUnitLayout would register a {@link BroadcastReceiver}
  *      to receive SHOW_AD response.</li>
  *  <li>Periodically, the AdUnitLayout would send a {@link Intent} to {@link AdUnitAllocationService} to fetch the
  *      next AD to show.</li>
  *  <li>{@link AdUnitAllocationService} will reply the request in a SHOW_AD Intent. When the {@link AdUnitLayout}
  *      receive this intent, it will create an {@link AdWhirlAdapter} for that intent</li>
  *  <li>{@link AdWhirlAdapter} will fetch and push the AdView to the {@link AdUnitLayout}.</li>
- *  <li>When next SHOW_AD response arrives, the {@link AdUnitLayout} will replace the existing adapter 
+ *  <li>When next SHOW_AD response arrives, the {@link AdUnitLayout} will replace the existing adapter
  *      with the new adapter.</li>
  * </ol>
- * 
+ *
  * <ul>
  *    <li>If the {@link AdWhirlAdapter}, fails to fetch new ADs. The {@link AdWhirlAdapter} is responsible to
  *    call {@link #submitReloadAdRequest()} to trigger loading new adapter immediately.</li>
@@ -73,11 +74,28 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  *          using the previous used cycle time.</li>
  *  </ul>
  *
+ * An {@link AdvertisingPreference} is hold in this layout which couled be used in {@link AdWhirlAdapter} to configure the preference of advertising.
+ * See {@link #setAdvertisingPreference}<p>
+ *
+ * XML setting for layout
+ * <pre><code>
+ * <!-- Set the ad layout for testing -->
+ * <com.locadz.AdUnitLayout xmlns:locadz="http://api.locadz.com/android/"
+ *      locadz:test_mode="true"
+ *      android:layout_width="wrap_content"
+ *      android:layout_height="wrap_content"
+ *      />
+ * </code></pre>
  *
  * TODO: add fetch location code.
  * TODO: implements stop scheduling when activity is not visible.
  */
 public class AdUnitLayout extends RelativeLayout {
+    /**
+     * The XML namespace for this layout({@value #XML_NAMESPACE}).<p>
+     */
+    public static final String XML_NAMESPACE = "http://api.locadz.com/android/";
+    public static final String XML_ATTR_TEST_MODE = "test_mode";
 
     public static final int GET_LOCATION_TIMEOUT = 30000;
     /** the adUnitId of this layout. */
@@ -114,23 +132,96 @@ public class AdUnitLayout extends RelativeLayout {
      */
     private boolean visible = true;
 
+    private AdvertisingPreference advertisingPreference = new AdvertisingPreference();
+
     /**
      * Constructor for XML style.
-     * @param context
-     * @param set
+     *
+     * @param context The containing context
+     * @param set The configuration from XML
      */
-    public AdUnitLayout(Context context, AttributeSet set) {
+    public AdUnitLayout(Context context, AttributeSet set)
+    {
         super(context, set);
         init((Activity) context, LocadzUtils.getAdUnitId(context));
+
+        /**
+         * Setup preference from XML attributes of this layout
+         */
+        AdvertisingPreference adPreference = getAdvertisingPreference();
+        boolean testMode = set.getAttributeBooleanValue(XML_NAMESPACE, XML_ATTR_TEST_MODE, adPreference.getTestMode());
+        if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            Log.d(LOG_TAG, "Configuration for TestMode(From XML):" + testMode);
+        }
+        adPreference.setTestMode(testMode);
+        setAdvertisingPreference(adPreference);
+        // :~)
     }
 
     /**
      * Constructor for initializing the layout programmatically.
-     * @param context
+     *
+     * @param context The containing context
+     * @param adUnitId The id used to handle {@link Context#sendBroadcast} from triggered service of this object
      */
-    public AdUnitLayout(Activity context, String adUnitId) {
+    public AdUnitLayout(Activity context, String adUnitId)
+    {
         super(context);
         init(context, adUnitId);
+    }
+
+    /**
+     * Sets the preference of advertising.<p>
+     *
+     * @param newAdvertisingPreference The preference of advertising for this layout
+     *
+     * @see #getAdvertisingPreference
+     */
+    public void setAdvertisingPreference(AdvertisingPreference newAdvertisingPreference) { this.advertisingPreference = newAdvertisingPreference; }
+    /**
+     * Gets the preference of advertising.<p>
+     *
+     * @return The advertising preference of this layour
+     *
+     * @see #setAdvertisingPreference
+     */
+    public AdvertisingPreference getAdvertisingPreference() { return new AdvertisingPreference(this.advertisingPreference); }
+
+    /**
+     * Submit a reload AD request asynchronously.
+     *
+     * TODO: find a better name for this function.
+     */
+    public void submitReloadAdRequest() {
+        Intent intent = AdUnitAllocationService.createIntent(this.getContext(), adUnitContext);
+        getActivity().startService(intent);
+    }
+
+    /**
+     *  submit a push view request to Android's handler. This will remove
+     *  old ad view and push a new one to this layout asynchronously.
+     *
+     * @param subView   the adview to push.
+     */
+    public void submitPushSubViewRequest(ViewGroup subView) {
+        Log.d(LocadzUtils.LOG_TAG, String.format("Scheduled pushSubView(%s)", subView));
+        getHandler().post(new ViewAdRunnable(this, subView));
+    }
+
+    /**
+     *
+     * @return  the context of this AdUnitLayout.
+     */
+    public AdUnitContext getAdUnitContext() {
+        return adUnitContext;
+    }
+
+    /**
+     *
+     * @return  the parent Activity or null if the activity has been recycled by the system.
+     */
+    public Activity getActivity() {
+        return activityReference.get();
     }
 
     /**
@@ -184,7 +275,6 @@ public class AdUnitLayout extends RelativeLayout {
             submitReloadAdRequest();
         }
     }
-
 
     /** {@inheritDoc} */
     @Override
@@ -250,35 +340,7 @@ public class AdUnitLayout extends RelativeLayout {
         countImpression();
     }
 
-    /**
-     *  submit a push view request to Android's handler. This will remove
-     *  old ad view and push a new one to this layout asynchronously.
-     *
-     * @param subView   the adview to push.
-     */
-    public void submitPushSubViewRequest(ViewGroup subView) {
-        Log.d(LocadzUtils.LOG_TAG, String.format("Scheduled pushSubView(%s)", subView));
-        getHandler().post(new ViewAdRunnable(this, subView));
-    }
-
-    /**
-     *
-     * @return  the context of this AdUnitLayout.
-     */
-    public AdUnitContext getAdUnitContext() {
-        return adUnitContext;
-    }
-
-    /**
-     *
-     * @return  the parent Activity or null if the activity has been recycled by the system.
-     */
-    public Activity getActivity() {
-        return activityReference.get();
-    }
-
-    private void countImpression() {
-    }
+    private void countImpression() {}
 
     /**
      *
@@ -308,30 +370,20 @@ public class AdUnitLayout extends RelativeLayout {
     }
 
     /**
-     * Submit a reload AD request asynchronously.
-     *
-     * TODO: find a better name for this function.
-     */
-    public void submitReloadAdRequest() {
-        Intent intent = AdUnitAllocationService.createIntent(this.getContext(), adUnitContext);
-        getActivity().startService(intent);
-    }
-
-    /**
      * Broadcast receiver that receives SHOW_AD intent and replace the existing adaptor with the
      * new one specified in the intent.
      */
     private static final class ShowAdIntentReceiver extends BroadcastReceiver {
 
         private final String adUnitId;
-        
+
         private final WeakReference<AdUnitLayout> locadzLayoutWeakReference;
 
         public ShowAdIntentReceiver(String adUnitId, AdUnitLayout layout) {
             this.adUnitId = adUnitId;
             locadzLayoutWeakReference = new WeakReference<AdUnitLayout>(layout);
         }
-        
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -370,9 +422,9 @@ public class AdUnitLayout extends RelativeLayout {
         private final WeakReference<AdUnitLayout> locadzLayoutWeakReference;
 
         private final Ration ration;
-        
+
         private final Extra extra;
-        
+
         public RotateAdRunnable(AdUnitLayout layout, Ration ration, Extra extra) {
             this.ration = ration;
             this.extra = extra;
@@ -435,5 +487,5 @@ public class AdUnitLayout extends RelativeLayout {
             }
         }
     }
-    
+
 }

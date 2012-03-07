@@ -16,6 +16,7 @@
   <properties>
     <version.android.sdk>2.1.2</version.android.sdk>
     <version.jackson>1.9.2</version.jackson>
+    <version.mobclix>3.2.0</version.mobclix>
   </properties>
 
   <build>
@@ -122,6 +123,13 @@
       <artifactId>adsense</artifactId>
       <version>1.0.0</version>
       <optional>true</optional>
+    </dependency>
+
+    <dependency>
+        <groupId>com.mobclix.android</groupId>
+        <artifactId>sdk</artifactId>
+        <version>${version.mobclix}</version>
+        <optional>true</optional>
     </dependency>
 
     <dependency>
