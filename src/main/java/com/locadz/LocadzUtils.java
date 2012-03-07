@@ -22,6 +22,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 
 import java.net.URI;
@@ -38,7 +39,7 @@ public class LocadzUtils {
     /**
      * The string of format to generate URI for service of Locadz.<p>
      */
-    private static final String INFO_URI_FORMAT = "http://api.locadz.com/rest/v1?appid=%s&appver=%s&client=2&location=%s";
+    private static final String INFO_URL = "http://api.locadz.com/rest/v1";
 
     /**
      * Generate the URI from context of AD unit for requesting service of Locadz.<p>
@@ -47,14 +48,19 @@ public class LocadzUtils {
      */
     public static final URI getInfoUri(AdUnitContext context)
     {
-        String locationString = "";
+        Uri.Builder ub = Uri.parse(INFO_URL).buildUpon();
+
+        ub.appendQueryParameter("appid", context.getAdUnitId());
+        ub.appendQueryParameter("appver", context.getAppVersion());
+        ub.appendQueryParameter("client", "2");
+
 
         Location location = context.getLocation();
         if (location != null) {
-            locationString = String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude());
+            ub.appendQueryParameter("location", String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude()));
         }
-
-        return URI.create(String.format(INFO_URI_FORMAT, context.getAdUnitId(), context.getAppVersion(), locationString));
+    
+        return URI.create(ub.build().toString());
     }
 
     /**
@@ -75,7 +81,7 @@ public class LocadzUtils {
                 packageName, activityName), PackageManager.GET_META_DATA);
             bundle = activityInfo.metaData;
             if (bundle != null) {
-                return bundle.getString(LocadzConstants.ADUNIT_KEY);
+                return bundle.getString(LocadzConstants.ADUNIT_ID_KEY);
             }
         } catch (PackageManager.NameNotFoundException exception) {
             // Activity cannot be found. Shouldn't be here.
@@ -87,7 +93,7 @@ public class LocadzUtils {
                 PackageManager.GET_META_DATA);
             bundle = appInfo.metaData;
             if (bundle != null) {
-                return bundle.getString(LocadzConstants.ADUNIT_KEY);
+                return bundle.getString(LocadzConstants.ADUNIT_ID_KEY);
             }
         } catch (PackageManager.NameNotFoundException exception) {
             // Application cannot be found. Shouldn't be here.

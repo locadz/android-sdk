@@ -27,6 +27,7 @@ import android.widget.TextView;
 import com.adwhirl.adapters.AdWhirlAdapter;
 import com.adwhirl.util.AdWhirlUtil;
 import com.locadz.AdUnitLayout;
+import com.locadz.AdvertisingPreference;
 
 import java.util.Arrays;
 import java.util.HashSet;

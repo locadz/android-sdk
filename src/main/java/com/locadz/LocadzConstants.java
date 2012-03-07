@@ -22,6 +22,6 @@ package com.locadz;
 public class LocadzConstants {
 
     /** Field name of the AdUnitId in the AndroidManifest.xml */
-    public static final String ADUNIT_KEY = "ADUNIT";
+    public static final String ADUNIT_ID_KEY = "ADUNIT_ID";
     
 }

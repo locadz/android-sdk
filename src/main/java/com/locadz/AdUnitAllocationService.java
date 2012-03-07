@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import static com.locadz.LocadzUtils.LOG_TAG;
+
 /** Service that retrieve the ad unit allocations from external source and cache locally in SharedPreference. */
 public final class AdUnitAllocationService extends IntentService {
 
@@ -115,7 +117,7 @@ public final class AdUnitAllocationService extends IntentService {
                 return SerializationUtils.fromJson(jsonString, AdUnitAllocation.class);
             }
         } catch (IOException e) {
-            Log.d(LocadzUtils.LOG_TAG, "Failed to de-serialize json config.", e);
+            Log.d(LOG_TAG, "Failed to de-serialize json config.", e);
         }
         return null;
     }
@@ -162,7 +164,7 @@ public final class AdUnitAllocationService extends IntentService {
      */
     String loadFromRemote(AdUnitContext adUnitContext) {
 
-        Log.d(LocadzUtils.LOG_TAG, String.format("Fetching config with %s", adUnitContext));
+        Log.d(LOG_TAG, String.format("Fetching config with %s", adUnitContext));
 
         HttpClient httpClient = HttpClientFactory.getInstance();
         URI uri = LocadzUtils.getInfoUri(adUnitContext);
@@ -175,18 +177,21 @@ public final class AdUnitAllocationService extends IntentService {
 
             // if response is 1xx, 2xx or 3xx, we would return the response body
             if (httpResponse.getStatusLine().getStatusCode() < HttpStatus.SC_BAD_REQUEST) {
-                Log.d(LocadzUtils.LOG_TAG, httpResponse.getStatusLine().toString());
+                Log.d(LOG_TAG, httpResponse.getStatusLine().toString());
 
                 HttpEntity entity = httpResponse.getEntity();
                 if (entity != null) {
                     ret = EntityUtils.toString(entity);
-
                 }
             }
         } catch (ClientProtocolException e) {
-            Log.e(LocadzUtils.LOG_TAG, "Caught ClientProtocolException in loadFromRemote()", e);
+            Log.e(LOG_TAG, "Caught ClientProtocolException in loadFromRemote()", e);
         } catch (IOException e) {
-            Log.e(LocadzUtils.LOG_TAG, "Caught IOException in loadFromRemote()", e);
+            Log.e(LOG_TAG, "Caught IOException in loadFromRemote()", e);
+        }
+        
+        if(Log.isLoggable(LOG_TAG, Log.DEBUG)) {
+            Log.d(LOG_TAG, String.format("Fetched Allocations is %s", ret));
         }
         return ret;
     }

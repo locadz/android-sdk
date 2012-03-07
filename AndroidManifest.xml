@@ -10,11 +10,12 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Activity-specific AdWhirl Key -->
+            <!-- Activity-specific AdUnit -->
+            <!-- All AdUnitLayouts with in this Activity will use the same ADUNIT_ID as the default Adunit Id. -->
             <!-- If both Activity-specific and App-wide AdWhirl Keys are specified, the
                  Activity-specific key will override the App-wide key. -->
-            <!-- If Activity-specific key is omitted, the App-wide key will be used. -->
-            <!-- <meta-data android:value="46a9e26bb1f5499ab7b00c9807ae034b" android:name="ADWHIRL_KEY" /> -->
+            <!-- If Activity-specific AdUnit Id is omitted, the App-wide AdUnit Id will be used. -->
+            <!-- <meta-data android:value="46a9e26bb1f5499ab7b00c9807ae034b" android:name="ADUNIT_ID" /> -->
         </activity>
         <!-- AdMob integration -->
         <activity android:name="com.google.ads.AdActivity"
@@ -33,11 +34,11 @@
         <activity android:name="com.millennialmedia.android.VideoPlayer"
                   android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
                   android:configChanges="keyboardHidden|orientation|keyboard" />
-        <!-- Application-wide AdWhirl Key -->
-        <!-- If both Activity-specific and App-wide AdWhirl Keys are specified, the
-             Activity-specific key will override the App-wide key. -->
-        <!-- If Activity-specific key is omitted, the App-wide key will be used. -->
-        <meta-data android:value="643eb700781e4f47b017ea27d1aba3be" android:name="ADUNIT" />
+        <!-- Application-wide AdUnit Id -->
+        <!-- If both Activity-specific and App-wide ide AdUnit Id are specified, the
+             Activity-specific Id will override the App-wide Id. -->
+        <!-- If Activity-specific Id is omitted, the App-wide Id will be used. -->
+        <meta-data android:value="643eb700781e4f47b017ea27d1aba3be" android:name="ADUNIT_ID" />
         <service android:enabled="true" android:name="com.locadz.AdUnitAllocationService"/>
         <service android:enabled="true" android:name="com.locadz.MockAdUnitAllocationService"/>
     </application>

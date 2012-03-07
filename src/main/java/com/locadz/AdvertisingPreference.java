@@ -1,9 +1,12 @@
-package com.adwhirl;
+/*
+ * Copyright (c) 2012. Blue Tang Studio LLC. All rights reserved.
+ */
+
+package com.locadz;
 
 import android.text.TextUtils;
 
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -187,11 +190,11 @@ public class AdvertisingPreference {
     /**
      * Gets the keyword for advertising as set of strings. Default value is an empty {@link Set}<p>
      *
-     * This method is irrelevent to {@link #getKeyword}.<p>
+     * This method is irrelevent to {@link #getKeywords}.<p>
      *
      * @return The keywords as a set of string
      *
-     * @see #getKeyword
+     * @see #getKeywords
      * @see #setKeywordSet
      */
     public Set<String> getKeywordSet()

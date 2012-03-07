@@ -8,7 +8,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
 import android.widget.ListView;
 import android.widget.ScrollView;
-import com.adwhirl.AdvertisingPreference;
+import com.locadz.AdvertisingPreference;
 import com.google.ads.AdSenseSpec;
 import com.google.ads.AdSenseSpec.AdFormat;
 import com.google.ads.AdSenseSpec.ExpandDirection;

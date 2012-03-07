@@ -17,7 +17,7 @@
 package com.adwhirl.adapters;
 
 import android.util.Log;
-import com.adwhirl.AdvertisingPreference;
+import com.locadz.AdvertisingPreference;
 import com.adwhirl.util.AdWhirlUtil;
 import com.locadz.AdUnitLayout;
 import com.locadz.LocadzUtils;
@@ -26,7 +26,6 @@ import com.locadz.model.Ration;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -104,7 +103,7 @@ public abstract class AdWhirlAdapter {
      * @param ration The meta-data of advertisement service
      * @param extra The extra parameters for advertisement service
      *
-     * @see com.adwhirl.AdvertisingPreference
+     * @see AdvertisingPreference
      */
     public static AdWhirlAdapter handle(
         AdUnitLayout adWhirlLayout, Ration ration, Extra extra
@@ -186,7 +185,7 @@ class AdapterBuilder {
         processMap.put(AdWhirlUtil.NETWORK_TYPE_INMOBI, new AdapterInfo("com.inmobi.androidsdk.IMAdView", "com.adwhirl.adapters.InMobiAdapter"));
         processMap.put(AdWhirlUtil.NETWORK_TYPE_MDOTM, new AdapterInfo("com.mdotm.android.ads.MdotMView", "com.adwhirl.adapters.MdotMAdapter"));
         processMap.put(AdWhirlUtil.NETWORK_TYPE_MILLENNIAL, new AdapterInfo("com.millennialmedia.android.MMAdView", "com.adwhirl.adapters.MillennialAdapter"));
-        processMap.put(AdWhirlUtil.NETWORK_TYPE_MOBCLIX, new AdapterInfo("com.mobclix.android.sdk.MobclixAdView", "com.adwhirl.adapters.MobclixAdapter"));
+        processMap.put(AdWhirlUtil.NETWORK_TYPE_MOBCLIX, new AdapterInfo("com.mobclix.android.sdk.MobclixAdView", "com.locadz.adapters.MobclixAdapter"));
         processMap.put(AdWhirlUtil.NETWORK_TYPE_ZESTADZ, new AdapterInfo("com.zestadz.android.ZestADZAdView", "com.adwhirl.adapters.ZestAdzAdapter"));
 
         mapOfAdapters = Collections.unmodifiableMap(processMap);

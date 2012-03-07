@@ -1,8 +1,12 @@
-package com.adwhirl.adapters;
+/*
+ * Copyright (c) 2012. Blue Tang Studio LLC. All rights reserved.
+ */
+
+package com.locadz.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdvertisingPreference;
+import com.adwhirl.adapters.AdWhirlAdapter;
 import com.locadz.AdUnitLayout;
 import com.locadz.LocadzUtils;
 import com.locadz.model.Extra;

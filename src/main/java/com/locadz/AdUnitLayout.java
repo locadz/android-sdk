@@ -33,7 +33,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import com.adwhirl.adapters.AdWhirlAdapter;
-import com.adwhirl.AdvertisingPreference;
 import com.locadz.model.Extra;
 import com.locadz.model.Ration;
 
@@ -91,11 +90,6 @@ import static com.locadz.LocadzUtils.LOG_TAG;
  * TODO: implements stop scheduling when activity is not visible.
  */
 public class AdUnitLayout extends RelativeLayout {
-    /**
-     * The XML namespace for this layout({@value #XML_NAMESPACE}).<p>
-     */
-    public static final String XML_NAMESPACE = "http://api.locadz.com/android/";
-    public static final String XML_ATTR_TEST_MODE = "test_mode";
 
     public static final int GET_LOCATION_TIMEOUT = 30000;
     /** the adUnitId of this layout. */
@@ -143,19 +137,31 @@ public class AdUnitLayout extends RelativeLayout {
     public AdUnitLayout(Context context, AttributeSet set)
     {
         super(context, set);
-        init((Activity) context, LocadzUtils.getAdUnitId(context));
-
         /**
          * Setup preference from XML attributes of this layout
          */
         AdvertisingPreference adPreference = getAdvertisingPreference();
-        boolean testMode = set.getAttributeBooleanValue(XML_NAMESPACE, XML_ATTR_TEST_MODE, adPreference.getTestMode());
+        AdUnitLayoutAttributeSet attributes = new AdUnitLayoutAttributeSet(set);
+
+        String adUnitId = attributes.getAdUnitId();
+        if (adUnitId == null) {
+            adUnitId = LocadzUtils.getAdUnitId(context);
+        }
+        if (adUnitId == null) {
+            Log.e(LOG_TAG, "Unable to obtain ADUNIT_ID from any scope.");
+            throw new IllegalArgumentException("Unable to obtain ADUNIT_ID from any scope.");
+        }
+
+        boolean testMode = attributes.getTestMode(adPreference.getTestMode());
         if (Log.isLoggable(LOG_TAG, Log.DEBUG)) {
             Log.d(LOG_TAG, "Configuration for TestMode(From XML):" + testMode);
         }
         adPreference.setTestMode(testMode);
         setAdvertisingPreference(adPreference);
         // :~)
+
+        init((Activity) context, adUnitId);
+
     }
 
     /**
@@ -231,7 +237,7 @@ public class AdUnitLayout extends RelativeLayout {
      */
     protected void init(Activity context, String adUnitId) {
         if (adUnitId == null) {
-            throw new IllegalArgumentException("ADUNIT is not presented.");
+            throw new IllegalArgumentException("ADUNIT_ID is not presented.");
         }
 
         this.adUnitId = adUnitId;

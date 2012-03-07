@@ -2,8 +2,7 @@ package com.adwhirl.adapters;
 
 import android.app.Activity;
 import android.util.Log;
-import com.adwhirl.AdvertisingPreference;
-import com.adwhirl.AdvertisingPreference.Gender;
+import com.locadz.AdvertisingPreference.Gender;
 import com.inmobi.androidsdk.IMAdListener;
 import com.inmobi.androidsdk.IMAdRequest;
 import com.inmobi.androidsdk.IMAdRequest.ErrorCode;

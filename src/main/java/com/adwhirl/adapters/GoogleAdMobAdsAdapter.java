@@ -19,7 +19,6 @@ package com.adwhirl.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import com.adwhirl.AdvertisingPreference;
 import com.adwhirl.util.AdWhirlUtil;
 import com.google.ads.Ad;
 import com.google.ads.AdListener;
