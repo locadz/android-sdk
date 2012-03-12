@@ -13,6 +13,13 @@
     <version>1.0.0-SNAPSHOT</version>
   </parent>
 
+
+  <scm>
+    <url>https://github.com/locadz/android-sdk</url>
+    <connection>scm:git:git@github.com:locadz/android-sdk.git</connection>
+    <developerConnection>scm:git:git@bitbucket.org:bluetang/locadz-android-sdk.git</developerConnection>
+  </scm>
+
   <properties>
     <version.android.sdk>2.1.2</version.android.sdk>
     <version.jackson>1.9.2</version.jackson>
